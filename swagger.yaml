@@ -1,0 +1,21 @@
+openapi: 3.0.0
+
+info:
+  title: Supik Server
+  description: Users and Computer management system
+  version: 0.0.2-SNAPSHOT
+
+paths:
+  /:
+    get:
+      summary: Docs
+      responses:
+        '200':
+          description: Documentation for all endpoints
+
+  /api:
+    get:
+      summary: Test
+      responses:
+        '200':
+          description: Test home page

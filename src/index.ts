@@ -21,6 +21,8 @@ import cors from 'cors';
 import {logger} from "./logger";
 import {router} from "./router";
 import * as dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
 
 dotenv.config();
 
@@ -29,9 +31,12 @@ app.use(express.json());
 app.use(cors());
 app.use('/api', router);
 
-const version = '0.0.1-SNAPSHOT';
+const version = '0.0.2-SNAPSHOT';
 
 const PORT: string | 3000 = process.env.PORT || 3000;
+
+const swaggerDocument = YAML.load('./swagger.yaml');
+app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.listen(PORT, async () => {
     logger.info(`Server running on http://localhost:${PORT}`);
