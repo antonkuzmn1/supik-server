@@ -31,7 +31,7 @@ app.use(express.json());
 app.use(cors());
 app.use('/api', router);
 
-const version = '0.0.2-SNAPSHOT';
+const version = '0.0.3-SNAPSHOT';
 
 const PORT: string | 3000 = process.env.PORT || 3000;
 
