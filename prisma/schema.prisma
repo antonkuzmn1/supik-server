@@ -8,9 +8,127 @@ datasource db {
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
+model Account {
+  id      Int      @id @default(autoincrement())
+  created DateTime @default(now()) @db.Timestamp(0)
+  updated DateTime @updatedAt @db.Timestamp()
+  deleted Int      @default(0) @db.TinyInt()
+
+  username String @unique @db.VarChar(30)
+  password String @db.VarChar(60)
+
+  fullname String @default("") @db.VarChar(100)
+  title    String @default("") @db.VarChar(255)
+  admin    Int    @default(0) @db.TinyInt()
+  disabled Int    @default(0) @db.TinyInt()
+
+  accountGroups AccountGroup[]
+}
+
+model Group {
+  id      Int      @id @default(autoincrement())
+  created DateTime @default(now()) @db.Timestamp(0)
+  updated DateTime @updatedAt @db.Timestamp()
+  deleted Int      @default(0) @db.TinyInt()
+
+  name  String @default("") @db.VarChar(100)
+  title String @default("") @db.VarChar(255)
+
+  accessRouters Int @default(0) @db.TinyInt()
+  accessUsers   Int @default(0) @db.TinyInt()
+
+  accountGroups     AccountGroup[]
+  routerGroupVeiwer RouterGroupViewer[]
+  routerGroupEditor RouterGroupEditor[]
+}
+
+model AccountGroup {
+  accountId Int
+  groupId   Int
+
+  account Account @relation(fields: [accountId], references: [id])
+  group   Group   @relation(fields: [groupId], references: [id])
+
+  @@id([accountId, groupId])
+}
+
+model Router {
+  id      Int      @id @default(autoincrement())
+  created DateTime @default(now()) @db.Timestamp(0)
+  updated DateTime @updatedAt @db.Timestamp()
+  deleted Int      @default(0) @db.TinyInt()
+
+  login         String @default("") @db.VarChar(100)
+  password      String @default("") @db.VarChar(100)
+  localAddress  String @default("") @db.VarChar(15)
+  remoteAddress String @default("") @db.VarChar(15)
+  name          String @default("") @db.VarChar(100)
+  title         String @default("") @db.VarChar(255)
+  disabled      Int    @default(0) @db.TinyInt()
+
+  certificate Bytes?
+  l2tpKey     String @default("") @db.VarChar(100)
+
+  vpns              VPN[]
+  routerGroupVeiwer RouterGroupViewer[]
+  routerGroupEditor RouterGroupEditor[]
+}
+
+model RouterGroupViewer {
+  routerId Int
+  groupId  Int
+
+  router Router @relation(fields: [routerId], references: [id])
+  group  Group  @relation(fields: [groupId], references: [id])
+
+  @@id([routerId, groupId])
+}
+
+model RouterGroupEditor {
+  routerId Int
+  groupId  Int
+
+  router Router @relation(fields: [routerId], references: [id])
+  group  Group  @relation(fields: [groupId], references: [id])
+
+  @@id([routerId, groupId])
+}
+
+model VPN {
+  id      Int      @id @default(autoincrement())
+  created DateTime @default(now()) @db.Timestamp(0)
+  updated DateTime @updatedAt @db.Timestamp()
+  deleted Int      @default(0) @db.TinyInt()
+
+  name          String @unique @db.VarChar(100)
+  password      String @default("") @db.VarChar(100)
+  service       String @default("") @db.VarChar(10)
+  localAddress  String @default("") @db.VarChar(15)
+  remoteAddress String @default("") @db.VarChar(15)
+  disabled      Int    @default(0) @db.TinyInt()
+
+  routerId Int
+  userId   Int?
+
+  router Router @relation(fields: [routerId], references: [id])
+  user   User?  @relation(fields: [userId], references: [id])
+}
+
 model User {
   id      Int      @id @default(autoincrement())
   created DateTime @default(now()) @db.Timestamp(0)
   updated DateTime @updatedAt @db.Timestamp()
   deleted Int      @default(0) @db.TinyInt()
+
+  name       String @default("") @db.VarChar(50)
+  surname    String @default("") @db.VarChar(50)
+  patronymic String @default("") @db.VarChar(50)
+  fullname   String @default("") @db.VarChar(150)
+  department String @default("") @db.VarChar(100)
+  title      String @default("") @db.VarChar(100)
+  login      String @default("") @db.VarChar(50)
+  password   String @default("") @db.VarChar(50)
+  disabled   Int    @default(0) @db.TinyInt()
+
+  vpns VPN[]
 }
