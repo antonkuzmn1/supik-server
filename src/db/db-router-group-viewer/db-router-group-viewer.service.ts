@@ -1,0 +1,49 @@
+import {logger} from "../../logger";
+import {Request, Response} from "express";
+import {DbRouterGroupViewerRepository} from "./db-router-group-viewer.repository";
+
+const className = 'DbRouterGroupViewerService';
+
+export class DbRouterGroupViewerService {
+
+    constructor(
+        private readonly repository: DbRouterGroupViewerRepository,
+    ) {
+        logger.debug(className);
+    }
+
+
+    post = async (req: Request, res: Response): Promise<Response> => {
+        logger.debug(className + '.post');
+        try {
+            return this.create(req, res);
+        } catch (error) {
+            console.error(error);
+            logger.error('Internal Server Error');
+            return res.status(500).send('Internal Server Error');
+        }
+    }
+
+    delete = async(req: Request, res: Response): Promise<Response> => {
+        logger.debug(className + '.delete');
+        try {
+            return this.trueDelete(req, res);
+        } catch (error) {
+            console.error(error);
+            logger.error('Internal Server Error');
+            return res.status(500).send('Internal Server Error');
+        }
+    }
+
+    private create = async (req: Request, res: Response): Promise<Response> => {
+        logger.debug(className + '.create');
+        const response = await this.repository.create(req.body.routerId, req.body.groupId);
+        return res.status(200).json(response);
+    }
+
+    private trueDelete = async (req: Request, res: Response): Promise<Response> => {
+        logger.debug(className + '.trueDelete');
+        const response = await this.repository.delete(req.body.routerId, req.body.groupId);
+        return res.status(200).json(response);
+    }
+}

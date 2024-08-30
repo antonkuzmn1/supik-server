@@ -2,7 +2,7 @@ import {logger} from "../../logger";
 import {Request, Response} from "express";
 import {DbRouterGroupEditorRepository} from "./db-router-group-editor.repository";
 
-const className = 'DbRouterService';
+const className = 'DbRouterGroupEditorService';
 
 export class DbRouterGroupEditorService {
 
