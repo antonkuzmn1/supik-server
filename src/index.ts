@@ -23,6 +23,7 @@ import {router} from "./router";
 import * as dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
+import {startup} from "./startup";
 
 dotenv.config();
 
@@ -41,4 +42,6 @@ app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.listen(PORT, async () => {
     logger.info(`Server running on http://localhost:${PORT}`);
     logger.info(`Version: ${version}`)
+
+    await startup();
 });
