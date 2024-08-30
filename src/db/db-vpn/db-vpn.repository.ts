@@ -36,6 +36,7 @@ export class DbVpnRepository {
     }
 
     create = async (data: {
+        idString: string,
         name: string,
         password: string,
         service: string,
@@ -58,6 +59,7 @@ export class DbVpnRepository {
 
     update = async (data: {
         id: number,
+        idString: string,
         name: string,
         password: string,
         service: string,

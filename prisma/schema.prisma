@@ -100,7 +100,8 @@ model Vpn {
   updated DateTime @updatedAt @db.Timestamp()
   deleted Int      @default(0) @db.TinyInt()
 
-  name          String @unique @db.VarChar(100)
+  idString      String @default("") @db.VarChar(10)
+  name          String @default("") @db.VarChar(100)
   password      String @default("") @db.VarChar(100)
   service       String @default("") @db.VarChar(10)
   localAddress  String @default("") @db.VarChar(15)

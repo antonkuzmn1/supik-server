@@ -1,0 +1,38 @@
+import {Router} from "express";
+import {SecurityMiddleware} from "../security/security.middleware";
+import {RouterOsService} from "./router-os.service";
+import {RouterOsRepository} from "./router-os.repository";
+
+const security = new SecurityMiddleware();
+const service = new RouterOsService(new RouterOsRepository());
+
+// /api/router-os
+export const routerOsController = Router()
+
+routerOsController.get(
+    '/',
+    security.getAccountFromToken,
+    security.accountShouldBeAdmin,
+    service.get,
+);
+
+// routerOsController.post(
+//     '/',
+//     security.getAccountFromToken,
+//     security.accountShouldBeAdmin,
+//     service.post,
+// );
+//
+// routerOsController.put(
+//     '/',
+//     security.getAccountFromToken,
+//     security.accountShouldBeAdmin,
+//     service.put,
+// );
+//
+// routerOsController.delete(
+//     '/',
+//     security.getAccountFromToken,
+//     security.accountShouldBeAdmin,
+//     service.delete,
+// );
