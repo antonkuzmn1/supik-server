@@ -38,7 +38,7 @@ model Group {
   accessUsers   Int @default(0) @db.TinyInt()
 
   accountGroups     AccountGroup[]
-  routerGroupVeiwer RouterGroupViewer[]
+  routerGroupViewer RouterGroupViewer[]
   routerGroupEditor RouterGroupEditor[]
 }
 
@@ -70,7 +70,7 @@ model Router {
   l2tpKey     String @default("") @db.VarChar(100)
 
   vpns              VPN[]
-  routerGroupVeiwer RouterGroupViewer[]
+  routerGroupViewer RouterGroupViewer[]
   routerGroupEditor RouterGroupEditor[]
 }
 
