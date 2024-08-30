@@ -26,7 +26,12 @@ export class SecurityAccountService {
                     include: {
                         accountGroups: {
                             include: {
-                                group: true,
+                                group: {
+                                    include: {
+                                        routerGroupViewer: true,
+                                        routerGroupEditor: true,
+                                    },
+                                },
                             },
                         },
                     },
@@ -47,7 +52,12 @@ export class SecurityAccountService {
                     include: {
                         accountGroups: {
                             include: {
-                                group: true,
+                                group: {
+                                    include: {
+                                        routerGroupViewer: true,
+                                        routerGroupEditor: true,
+                                    },
+                                },
                             },
                         },
                     },

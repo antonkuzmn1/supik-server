@@ -69,7 +69,7 @@ model Router {
   certificate Bytes?
   l2tpKey     String @default("") @db.VarChar(100)
 
-  vpns              VPN[]
+  vpns              Vpn[]
   routerGroupViewer RouterGroupViewer[]
   routerGroupEditor RouterGroupEditor[]
 }
@@ -94,7 +94,7 @@ model RouterGroupEditor {
   @@id([routerId, groupId])
 }
 
-model VPN {
+model Vpn {
   id      Int      @id @default(autoincrement())
   created DateTime @default(now()) @db.Timestamp(0)
   updated DateTime @updatedAt @db.Timestamp()
@@ -130,5 +130,5 @@ model User {
   password   String @default("") @db.VarChar(50)
   disabled   Int    @default(0) @db.TinyInt()
 
-  vpns VPN[]
+  vpns Vpn[]
 }
