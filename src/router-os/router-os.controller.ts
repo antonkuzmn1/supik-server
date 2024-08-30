@@ -19,23 +19,26 @@ routerOsController.get(
     service.get,
 );
 
-// routerOsController.post(
-//     '/',
-//     security.getAccountFromToken,
-//     security.accountShouldBeAdmin,
-//     service.post,
-// );
-//
-// routerOsController.put(
-//     '/',
-//     security.getAccountFromToken,
-//     security.accountShouldBeAdmin,
-//     service.put,
-// );
-//
-// routerOsController.delete(
-//     '/',
-//     security.getAccountFromToken,
-//     security.accountShouldBeAdmin,
-//     service.delete,
-// );
+routerOsController.post(
+    '/',
+    security.getAccountFromToken,
+    security.accountShouldBeAdmin,
+    middleware.connectToRouter,
+    service.post,
+);
+
+routerOsController.put(
+    '/',
+    security.getAccountFromToken,
+    security.accountShouldBeAdmin,
+    middleware.connectToRouter,
+    service.put,
+);
+
+routerOsController.delete(
+    '/',
+    security.getAccountFromToken,
+    security.accountShouldBeAdmin,
+    middleware.connectToRouter,
+    service.delete,
+);

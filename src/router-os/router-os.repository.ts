@@ -13,7 +13,7 @@ export class RouterOsRepository {
         api: RouterOSAPI,
         id: string
     ): Promise<IRosGenericResponse> => {
-        logger.debug(className + '.getVpnAccountById');
+        logger.debug(className + '.findUnique');
 
         return api.write('/ppp/secret/print', [`?.id=${id}`]);
     }
@@ -21,9 +21,63 @@ export class RouterOsRepository {
     findMany = async (
         api: RouterOSAPI
     ): Promise<IRosGenericResponse> => {
-        logger.debug(className + '.getVpnAccounts');
+        logger.debug(className + '.findMany');
 
         return api.write('/ppp/secret/print');
+    }
+
+    create = async (
+        api: RouterOSAPI,
+        name: string,
+        password: string,
+        profile: string,
+        remoteAddress: string,
+        service: string = 'any',
+        disabled: string = 'false',
+    ): Promise<IRosGenericResponse> => {
+        logger.debug(className + '.create');
+
+        return api.write('/ppp/secret/add', [
+            `=name=${name}`,
+            `=password=${password}`,
+            `=profile=${profile}`,
+            `=remote-address=${remoteAddress}`,
+            `=service=${service}`,
+            `=disabled=${disabled}`,
+        ]);
+    }
+
+    update = async (
+        api: RouterOSAPI,
+        idString: string,
+        name?: string,
+        password?: string,
+        profile?: string,
+        remoteAddress?: string,
+        service?: string,
+        disabled?: string
+    ): Promise<IRosGenericResponse> => {
+        logger.debug(className + '.update');
+
+        const params: string[] = [`=.id=${idString}`];
+
+        if (name !== undefined) params.push(`=name=${name}`);
+        if (password !== undefined) params.push(`=password=${password}`);
+        if (profile !== undefined) params.push(`=profile=${profile}`);
+        if (remoteAddress !== undefined) params.push(`=remote-address=${remoteAddress}`);
+        if (service !== undefined) params.push(`=service=${service}`);
+        if (disabled !== undefined) params.push(`=disabled=${disabled}`);
+
+        return api.write('/ppp/secret/set', params);
+    }
+
+    delete = async (
+        api: RouterOSAPI,
+        idString: string,
+    ): Promise<IRosGenericResponse> => {
+        logger.debug(className + '.delete');
+
+        return api.write('/ppp/secret/remove', [`=.id=${idString}`]);
     }
 
 }

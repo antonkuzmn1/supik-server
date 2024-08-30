@@ -8,12 +8,12 @@ const app = express();
 app.use(express.json());
 app.use('/api', router);
 
-// const random: number = Math.floor(Math.random() * 100 * 100 * 100 * 100);
+const random: number = Math.floor(Math.random() * 100 * 100 * 100 * 100);
 
 const host = process.env.TEST_ROUTER_HOST as string;
 const user = process.env.TEST_ROUTER_USER as string;
 const password = process.env.TEST_ROUTER_PASSWORD as string;
-const idString = '*4';
+const remoteAddress = process.env.TEST_ROUTER_REMOTE_ADDRESS as string;
 
 describe('router-os', () => {
     test('e2e', async () => {
@@ -40,17 +40,25 @@ describe('router-os', () => {
         const token = responseWithRootToken.body.token;
         const headers = {'Authorization': `Bearer ${token}`}
 
-        // // create test entity
-        // const responseWithNewEntity = await request(app)
-        //     .post('/api/db/router')
-        //     .set(headers)
-        //     .send({
-        //         login: random.toString(),
-        //     })
-        //     .expect('Content-Type', /json/)
-        //     .expect(200)
-        // expect(responseWithNewEntity.body.login).toBe(random.toString());
-        // const router: Router = responseWithNewEntity.body;
+        // create test entity
+        const responseWithNewEntity = await request(app)
+            .post('/api/router-os')
+            .set(headers)
+            .query({
+                host,
+                user,
+                password,
+            })
+            .send({
+                name: 'test_' + random.toString(),
+                password: 'test_' + random.toString(),
+                profile: 'default',
+                remoteAddress: remoteAddress,
+            })
+            .expect('Content-Type', /json/)
+            .expect(200)
+        expect(responseWithNewEntity.body.name).toBe('test_' + random.toString());
+        const idString: string = responseWithNewEntity.body['.id'];
 
         // find all
         const response3 = await request(app)
@@ -78,30 +86,39 @@ describe('router-os', () => {
             .expect('Content-Type', /json/)
             .expect(200)
         expect(response4.body).toBeDefined();
-        console.log(response4.body);
 
-        // // update test entity
-        // const response5 = await request(app)
-        //     .put('/api/db/router')
-        //     .set(headers)
-        //     .send({
-        //         id: router.id,
-        //         title: random.toString(),
-        //     })
-        //     .expect('Content-Type', /json/)
-        //     .expect(200)
-        // expect(response5.body.title).toBe(random.toString());
-        //
-        // // delete test entity
-        // const response8 = await request(app)
-        //     .delete('/api/db/router')
-        //     .set(headers)
-        //     .send({
-        //         id: router.id,
-        //     })
-        //     .expect('Content-Type', /json/)
-        //     .expect(200)
-        // expect(response8.body.deleted).toBe(1);
+        // update test entity
+        const response5 = await request(app)
+            .put('/api/router-os')
+            .set(headers)
+            .query({
+                host,
+                user,
+                password,
+            })
+            .send({
+                idString,
+                name: 'test_updated_' + random.toString(),
+            })
+            .expect('Content-Type', /json/)
+            .expect(200)
+        expect(response5.body.name).toBe('test_updated_' + random.toString());
+
+        // delete test entity
+        const response8 = await request(app)
+            .delete('/api/router-os')
+            .set(headers)
+            .query({
+                host,
+                user,
+                password,
+            })
+            .send({
+                idString,
+            })
+            .expect('Content-Type', /json/)
+            .expect(200)
+        expect(response8.body.length).toBe(0);
 
     });
 
