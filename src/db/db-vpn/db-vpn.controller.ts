@@ -1,4 +1,4 @@
 import {Router} from "express";
 
-// /api/db/db-vpn
+// /api/db/vpn
 export const dbVpnController = Router()

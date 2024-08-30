@@ -8,7 +8,7 @@ const security = new SecurityMiddleware();
 const middleware = new DbRouterMiddleware();
 const service = new DbRouterService(new DbRouterRepository());
 
-// /api/db/db-router
+// /api/db/router
 export const dbRouterController = Router()
 
 dbRouterController.get(
@@ -21,20 +21,20 @@ dbRouterController.get(
 dbRouterController.post(
     '/',
     security.getAccountFromToken,
-    middleware.accountShouldBeViewer,
+    middleware.accountShouldBeEditor,
     service.post,
 );
 
 dbRouterController.put(
     '/',
     security.getAccountFromToken,
-    middleware.accountShouldBeViewer,
+    middleware.accountShouldBeEditor,
     service.put,
 );
 
 dbRouterController.delete(
     '/',
     security.getAccountFromToken,
-    middleware.accountShouldBeViewer,
+    middleware.accountShouldBeEditor,
     service.delete,
 );

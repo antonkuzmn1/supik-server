@@ -5,7 +5,7 @@ import {SecurityGroupService} from "./security-group.service";
 const security = new SecurityMiddleware();
 const service = new SecurityGroupService();
 
-// /api/security/security-group
+// /api/security/group
 export const securityGroupController = Router();
 
 securityGroupController.get(

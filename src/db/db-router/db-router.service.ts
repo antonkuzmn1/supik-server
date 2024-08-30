@@ -97,7 +97,7 @@ export class DbRouterService implements CrudInterface {
     }
 
     private softDelete = async (req: Request, res: Response): Promise<Response> => {
-        logger.debug(className + '.delete');
+        logger.debug(className + '.softDelete');
         const response = await this.repository.delete(req.body.id);
         return res.status(200).json(response);
     }

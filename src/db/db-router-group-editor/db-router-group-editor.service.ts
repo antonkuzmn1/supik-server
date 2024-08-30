@@ -1,19 +1,22 @@
 import {logger} from "../../logger";
 import {Request, Response} from "express";
-import {CrudInterface} from "../../common/crud.interface";
+import {DbRouterGroupEditorRepository} from "./db-router-group-editor.repository";
 
-export class DbRouterGroupEditorService implements CrudInterface {
+const className = 'DbRouterService';
 
-    constructor() {
-        logger.debug(this.constructor.name);
+export class DbRouterGroupEditorService {
+
+    constructor(
+        private readonly repository: DbRouterGroupEditorRepository,
+    ) {
+        logger.debug(className);
     }
 
-    async get(req: Request, res: Response): Promise<Response> {
-        logger.debug(this.constructor.name + '.get');
+
+    post = async (req: Request, res: Response): Promise<Response> => {
+        logger.debug(className + '.post');
         try {
-
-            return res.status(200).json();
-
+            return this.create(req, res);
         } catch (error) {
             console.error(error);
             logger.error('Internal Server Error');
@@ -21,12 +24,10 @@ export class DbRouterGroupEditorService implements CrudInterface {
         }
     }
 
-    async post(req: Request, res: Response): Promise<Response> {
-        logger.debug(this.constructor.name + '.post');
+    delete = async(req: Request, res: Response): Promise<Response> => {
+        logger.debug(className + '.delete');
         try {
-
-            return res.status(200).json();
-
+            return this.trueDelete(req, res);
         } catch (error) {
             console.error(error);
             logger.error('Internal Server Error');
@@ -34,29 +35,15 @@ export class DbRouterGroupEditorService implements CrudInterface {
         }
     }
 
-    async put(req: Request, res: Response): Promise<Response> {
-        logger.debug(this.constructor.name + '.put');
-        try {
-
-            return res.status(200).json();
-
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
-        }
+    private create = async (req: Request, res: Response): Promise<Response> => {
+        logger.debug(className + '.create');
+        const response = await this.repository.create(req.body.routerId, req.body.groupId);
+        return res.status(200).json(response);
     }
 
-    async delete(req: Request, res: Response): Promise<Response> {
-        logger.debug(this.constructor.name + '.delete');
-        try {
-
-            return res.status(200).json();
-
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
-        }
+    private trueDelete = async (req: Request, res: Response): Promise<Response> => {
+        logger.debug(className + '.trueDelete');
+        const response = await this.repository.delete(req.body.routerId, req.body.groupId);
+        return res.status(200).json(response);
     }
 }

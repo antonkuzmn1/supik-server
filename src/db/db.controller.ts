@@ -10,6 +10,6 @@ export const dbController = Router()
 
 dbController.use('/router', dbRouterController);
 dbController.use('/router-group-viewer', dbRouterGroupViewerController);
-dbController.use('/groups-group-editor', dbRouterGroupEditorController);
+dbController.use('/router-group-editor', dbRouterGroupEditorController);
 dbController.use('/user', dbUserController);
 dbController.use('/vpn', dbVpnController);

@@ -1,4 +1,4 @@
 import {Router} from "express";
 
-// /api/db/db-user
+// /api/db/user
 export const dbUserController = Router()
