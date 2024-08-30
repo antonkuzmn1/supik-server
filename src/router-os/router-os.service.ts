@@ -2,6 +2,7 @@ import {logger} from "../logger";
 import {CrudInterface} from "../common/crud.interface";
 import {Request, Response} from "express";
 import {RouterOsRepository} from "./router-os.repository";
+import {RouterOSAPI} from "node-routeros";
 
 const className = 'RouterOsService';
 
@@ -15,35 +16,15 @@ export class RouterOsService implements CrudInterface {
     get = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.get');
         try {
-            const host = req.query.host as string;
-            if (!host) {
-                return res.status(400).send('"host" field is required');
-            }
-            const user = req.query.user as string;
-            if (!user) {
-                return res.status(400).send('"user" field is required');
-            }
-            const password = req.query.password as string;
-            if (!password) {
-                return res.status(400).send('"password" field is required');
-            }
-
-            const api = await this.repository.getApi(
-                host,
-                user,
-                password,
-            ).connect();
-            if (!api.connected) {
-                return res.status(400).send('Connection failed');
-            }
+            const api: RouterOSAPI = req.body.api;
 
             const idString = req.query.idString as string;
             if (!idString) {
-                const vpns = await this.repository.getVpnAccounts(api);
+                const vpns = await this.repository.findMany(api);
                 return res.status(200).json(vpns);
             }
 
-            const vpn = await this.repository.getVpnAccountById(api, idString);
+            const vpn = await this.repository.findUnique(api, idString);
             return res.status(200).json(vpn);
         } catch (error) {
             console.error(error);

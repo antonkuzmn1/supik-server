@@ -2,8 +2,10 @@ import {Router} from "express";
 import {SecurityMiddleware} from "../security/security.middleware";
 import {RouterOsService} from "./router-os.service";
 import {RouterOsRepository} from "./router-os.repository";
+import {RouterOsMiddleware} from "./router-os.middleware";
 
 const security = new SecurityMiddleware();
+const middleware = new RouterOsMiddleware();
 const service = new RouterOsService(new RouterOsRepository());
 
 // /api/router-os
@@ -13,6 +15,7 @@ routerOsController.get(
     '/',
     security.getAccountFromToken,
     security.accountShouldBeAdmin,
+    middleware.connectToRouter,
     service.get,
 );
 

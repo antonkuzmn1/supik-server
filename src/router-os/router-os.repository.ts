@@ -4,23 +4,12 @@ import {IRosGenericResponse} from "node-routeros/dist/IRosGenericResponse";
 
 const className = 'RouterOsRepository';
 
-const port = process.env.TEST_ROUTER_PORT as any as number;
-const timeout = process.env.TEST_ROUTER_TIMEOUT as any as number;
-
 export class RouterOsRepository {
     constructor() {
         logger.debug(className);
     }
 
-    getVpnAccounts = async (
-        api: RouterOSAPI
-    ): Promise<IRosGenericResponse> => {
-        logger.debug(className + '.getVpnAccounts');
-
-        return api.write('/ppp/secret/print');
-    }
-
-    getVpnAccountById = async (
+    findUnique = async (
         api: RouterOSAPI,
         id: string
     ): Promise<IRosGenericResponse> => {
@@ -29,20 +18,12 @@ export class RouterOsRepository {
         return api.write('/ppp/secret/print', [`?.id=${id}`]);
     }
 
-    getApi = (
-        host: string,
-        user: string,
-        password: string,
-    ): RouterOSAPI => {
-        logger.debug(className + '.getApi');
+    findMany = async (
+        api: RouterOSAPI
+    ): Promise<IRosGenericResponse> => {
+        logger.debug(className + '.getVpnAccounts');
 
-        return new RouterOSAPI({
-            host,
-            user,
-            password,
-            port,
-            timeout,
-        });
+        return api.write('/ppp/secret/print');
     }
 
 }
