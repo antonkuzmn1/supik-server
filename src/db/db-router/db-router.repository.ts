@@ -1,11 +1,11 @@
-import {Router, RouterGroupEditor, RouterGroupViewer, VPN} from "@prisma/client";
+import {Router, RouterGroupEditor, RouterGroupViewer, Vpn} from "@prisma/client";
 import {logger} from "../../logger";
 import {prisma} from "../../prisma";
 
 const className = 'DbRouterRepository'
 
 export interface RouterExtended extends Router {
-    vpns: VPN[],
+    vpns: Vpn[],
     routerGroupViewer: RouterGroupViewer[],
     routerGroupEditor: RouterGroupEditor[],
 }
