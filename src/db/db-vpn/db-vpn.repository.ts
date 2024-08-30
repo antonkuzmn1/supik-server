@@ -1,4 +1,3 @@
-import {Router, RouterGroupEditor, RouterGroupViewer, VPN} from "@prisma/client";
 import {logger} from "../../logger";
 import {prisma} from "../../prisma";
 
@@ -17,108 +16,72 @@ export class DbVpnRepository {
                 deleted: 0,
             },
             include: {
-                vpns: true,
-                routerGroupViewer: {
-                    include: {
-                        group: true,
-                    },
-                },
-                routerGroupEditor: {
-                    include: {
-                        group: true,
-                    },
-                },
+                router: true,
+                user: true,
             },
         });
     }
 
-    findMany = async (): Promise<RouterExtended[]> => {
+    findMany = async (): Promise<any> => {
         logger.debug(className + '.findMany');
-        return prisma.router.findMany({
+        return prisma.vpn.findMany({
             where: {
                 deleted: 0,
             },
             include: {
-                vpns: true,
-                routerGroupViewer: {
-                    include: {
-                        group: true,
-                    },
-                },
-                routerGroupEditor: {
-                    include: {
-                        group: true,
-                    },
-                },
+                router: true,
+                user: true,
             },
         });
     }
 
     create = async (data: {
-        login: string,
+        name: string,
         password: string,
+        service: string,
         localAddress: string,
         remoteAddress: string,
-        name: string,
         title: string,
         disabled: 0 | 1,
-        certificate: Buffer | null,
-        l2tpKey: string,
-    }): Promise<RouterExtended> => {
+        routerId: number,
+        userId: number,
+    }): Promise<any> => {
         logger.debug(className + '.create');
-        return prisma.router.create({
+        return prisma.vpn.create({
             data: data,
             include: {
-                vpns: true,
-                routerGroupViewer: {
-                    include: {
-                        group: true,
-                    },
-                },
-                routerGroupEditor: {
-                    include: {
-                        group: true,
-                    },
-                },
+                router: true,
+                user: true,
             },
         });
     }
 
     update = async (data: {
         id: number,
-        login: string,
+        name: string,
         password: string,
+        service: string,
         localAddress: string,
         remoteAddress: string,
-        name: string,
         title: string,
         disabled: 0 | 1,
-        certificate: Buffer | null,
-        l2tpKey: string,
-    }): Promise<RouterExtended> => {
+        routerId: number,
+        userId: number,
+    }): Promise<any> => {
         logger.debug(className + '.update');
-        return prisma.router.update({
+        return prisma.vpn.update({
             where: {id: data.id},
             data: data,
             include: {
-                vpns: true,
-                routerGroupViewer: {
-                    include: {
-                        group: true,
-                    },
-                },
-                routerGroupEditor: {
-                    include: {
-                        group: true,
-                    },
-                },
+                router: true,
+                user: true,
             },
         });
     }
 
-    delete = async (id: number): Promise<RouterExtended> => {
+    delete = async (id: number): Promise<any> => {
         logger.debug(className + '.delete');
-        return prisma.router.update({
+        return prisma.vpn.update({
             where: {
                 id,
             },
@@ -126,17 +89,8 @@ export class DbVpnRepository {
                 deleted: 1,
             },
             include: {
-                vpns: true,
-                routerGroupViewer: {
-                    include: {
-                        group: true,
-                    },
-                },
-                routerGroupEditor: {
-                    include: {
-                        group: true,
-                    },
-                },
+                router: true,
+                user: true,
             },
         });
     }

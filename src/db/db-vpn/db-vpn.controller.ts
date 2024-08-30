@@ -1,9 +1,10 @@
 import {Router} from "express";
 import {SecurityMiddleware} from "../../security/security.middleware";
-import {DbVpnMiddleware} from "./db-vpn.middleware";
+import {DbVpnService} from "./db-vpn.service";
+import {DbVpnRepository} from "./db-vpn.repository";
 
 const security = new SecurityMiddleware();
-const middleware = new DbVpnMiddleware();
+const service = new DbVpnService(new DbVpnRepository());
 
 // /api/db/vpn
 export const dbVpnController = Router()
@@ -11,23 +12,23 @@ export const dbVpnController = Router()
 dbVpnController.get(
     '/',
     security.getAccountFromToken,
-    // security.accountShouldBeAdmin,
+    service.get,
 );
 
 dbVpnController.post(
     '/',
     security.getAccountFromToken,
-    // security.accountShouldBeAdmin,
+    service.post,
 );
 
 dbVpnController.put(
     '/',
     security.getAccountFromToken,
-    // security.accountShouldBeAdmin,
+    service.put,
 );
 
 dbVpnController.delete(
     '/',
     security.getAccountFromToken,
-    // security.accountShouldBeAdmin,
+    service.delete,
 );

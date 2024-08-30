@@ -2,12 +2,14 @@ import {logger} from "../../logger";
 import {CrudInterface} from "../../common/crud.interface";
 import {Request, Response} from "express";
 import {prisma} from "../../prisma";
-import {RouterGroupViewer} from "@prisma/client";
+import {DbVpnRepository} from "./db-vpn.repository";
 
 const className = 'DbVpnService';
 
 export class DbVpnService implements CrudInterface {
-    constructor() {
+    constructor(
+        private readonly repository: DbVpnRepository,
+    ) {
         logger.debug(className);
     }
 
@@ -106,7 +108,35 @@ export class DbVpnService implements CrudInterface {
     post = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.post');
         try {
-            return this.create(req, res);
+            if (!req.body.account.admin) {
+                const groupsIds = req.body.account.groupIds;
+                const routerId = req.body.routerId;
+                const router = await prisma.router.findUnique({
+                    where: {
+                        id: routerId,
+                        deleted: 0,
+                    },
+                    include: {
+                        routerGroupViewer: true,
+                        routerGroupEditor: true,
+                    },
+                });
+                if (!router) {
+                    return res.status(404).send(`Router with ID ${routerId} not found`);
+                }
+                const routerGroupEditor = router.routerGroupEditor;
+                const accountIsEditor = groupsIds.some((groupId: number) => {
+                    return routerGroupEditor.some(routerGroupEditor => {
+                        return routerGroupEditor.groupId === groupId;
+                    })
+                });
+                if (!accountIsEditor) {
+                    return res.status(403).send('Account is not an editor');
+                }
+                return this.create(req, res);
+            } else {
+                return this.create(req, res);
+            }
         } catch (error) {
             console.error(error);
             logger.error('Internal Server Error');
@@ -117,7 +147,40 @@ export class DbVpnService implements CrudInterface {
     put = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.put');
         try {
-            return this.update(req, res);
+            if (!req.body.account.admin) {
+                const groupsIds = req.body.account.groupIds;
+                const vpnId = req.body.id;
+                const vpn = await this.repository.findUnique(vpnId);
+                if (!vpn) {
+                    return res.status(404).send(`VPN with ID ${vpnId} not found`);
+                }
+                const routerId = vpn.router.id;
+                const router = await prisma.router.findUnique({
+                    where: {
+                        id: routerId,
+                        deleted: 0,
+                    },
+                    include: {
+                        routerGroupViewer: true,
+                        routerGroupEditor: true,
+                    },
+                });
+                if (!router) {
+                    return res.status(404).send(`Router with ID ${routerId} not found`);
+                }
+                const routerGroupEditor = router.routerGroupEditor;
+                const accountIsEditor = groupsIds.some((groupId: number) => {
+                    return routerGroupEditor.some(routerGroupEditor => {
+                        return routerGroupEditor.groupId === groupId;
+                    })
+                });
+                if (!accountIsEditor) {
+                    return res.status(403).send('Account is not an editor');
+                }
+                return this.update(req, res);
+            } else {
+                return this.update(req, res);
+            }
         } catch (error) {
             console.error(error);
             logger.error('Internal Server Error');
@@ -128,7 +191,40 @@ export class DbVpnService implements CrudInterface {
     delete = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.delete');
         try {
-            return this.softDelete(req, res);
+            if (!req.body.account.admin) {
+                const groupsIds = req.body.account.groupIds;
+                const vpnId = req.body.id;
+                const vpn = await this.repository.findUnique(vpnId);
+                if (!vpn) {
+                    return res.status(404).send(`VPN with ID ${vpnId} not found`);
+                }
+                const routerId = vpn.router.id;
+                const router = await prisma.router.findUnique({
+                    where: {
+                        id: routerId,
+                        deleted: 0,
+                    },
+                    include: {
+                        routerGroupViewer: true,
+                        routerGroupEditor: true,
+                    },
+                });
+                if (!router) {
+                    return res.status(404).send(`Router with ID ${routerId} not found`);
+                }
+                const routerGroupEditor = router.routerGroupEditor;
+                const accountIsEditor = groupsIds.some((groupId: number) => {
+                    return routerGroupEditor.some(routerGroupEditor => {
+                        return routerGroupEditor.groupId === groupId;
+                    })
+                });
+                if (!accountIsEditor) {
+                    return res.status(403).send('Account is not an editor');
+                }
+                return this.softDelete(req, res);
+            } else {
+                return this.softDelete(req, res);
+            }
         } catch (error) {
             console.error(error);
             logger.error('Internal Server Error');

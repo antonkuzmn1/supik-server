@@ -105,6 +105,7 @@ model Vpn {
   service       String @default("") @db.VarChar(10)
   localAddress  String @default("") @db.VarChar(15)
   remoteAddress String @default("") @db.VarChar(15)
+  title         String @default("") @db.VarChar(255)
   disabled      Int    @default(0) @db.TinyInt()
 
   routerId Int
