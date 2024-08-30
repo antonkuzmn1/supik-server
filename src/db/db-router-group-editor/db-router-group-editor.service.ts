@@ -2,7 +2,7 @@ import {logger} from "../../logger";
 import {Request, Response} from "express";
 import {CrudInterface} from "../../common/crud.interface";
 
-export class RouterGroupEditorService implements CrudInterface {
+export class DbRouterGroupEditorService implements CrudInterface {
 
     constructor() {
         logger.debug(this.constructor.name);

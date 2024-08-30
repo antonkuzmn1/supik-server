@@ -1,14 +1,14 @@
 import {logger} from "../../logger";
 import {Request, Response} from "express";
 import {CrudInterface} from "../../common/crud.interface";
-import {RouterRepository} from "./router.repository";
+import {DbRouterRepository} from "./db-router.repository";
 
-const className = 'RouterService';
+const className = 'DbRouterService';
 
-export class RouterService implements CrudInterface {
+export class DbRouterService implements CrudInterface {
 
     constructor(
-        private readonly repository: RouterRepository,
+        private readonly repository: DbRouterRepository,
     ) {
         logger.debug(className);
     }

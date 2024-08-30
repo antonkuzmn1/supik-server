@@ -2,7 +2,7 @@ import express from "express";
 import {router} from "../../router";
 import request from "supertest";
 import {prisma} from "../../prisma";
-import {Account} from "@prisma/client";
+import {Account, Router} from "@prisma/client";
 
 const app = express();
 app.use(express.json());
@@ -10,10 +10,10 @@ app.use('/api', router);
 
 const random: number = Math.floor(Math.random() * 100 * 100 * 100 * 100);
 
-describe('account', () => {
+describe('db-router', () => {
     test('e2e', async () => {
 
-        // get account
+        // get security-account
         const root = (await prisma.account.findUnique({
             where: {
                 id: 1
@@ -22,7 +22,7 @@ describe('account', () => {
         expect(root).toBeDefined();
 
         // get token by credentials
-        const response = await request(app)
+        const responseWithRootToken = await request(app)
             .post('/api/security')
             .send({
                 username: 'root',
@@ -30,25 +30,26 @@ describe('account', () => {
             })
             .expect('Content-Type', /json/)
             .expect(200);
-        expect(response.body.token).toBeDefined();
-        expect(response.body.account.id).toBe(1);
-        const token = response.body.token;
+        expect(responseWithRootToken.body.token).toBeDefined();
+        expect(responseWithRootToken.body.account.id).toBe(1);
+        const token = responseWithRootToken.body.token;
         const headers = {'Authorization': `Bearer ${token}`}
 
         // create test entity
-        const response2 = await request(app)
-            .post('/api/security/group')
+        const responseWithNewEntity = await request(app)
+            .post('/api/db/router')
             .set(headers)
             .send({
-                name: random.toString(),
+                login: random.toString(),
             })
             .expect('Content-Type', /json/)
             .expect(200)
-        expect(response2.body.name).toBe(random.toString());
+        expect(responseWithNewEntity.body.login).toBe(random.toString());
+        const router: Router = responseWithNewEntity.body;
 
         // find all
         const response3 = await request(app)
-            .get('/api/security/group')
+            .get('/api/db/router')
             .set(headers)
             .expect('Content-Type', /json/)
             .expect(200)
@@ -56,21 +57,21 @@ describe('account', () => {
 
         // find test entity
         const response4 = await request(app)
-            .get('/api/security/group')
+            .get('/api/db/router')
             .query({
-                id: response2.body.id,
+                id: router.id,
             })
             .set(headers)
             .expect('Content-Type', /json/)
             .expect(200)
-        expect(response4.body.name).toBe(response2.body.name);
+        expect(response4.body.login).toBe(router.login);
 
         // update test entity
         const response5 = await request(app)
-            .put('/api/security/group')
+            .put('/api/db/router')
             .set(headers)
             .send({
-                id: response4.body.id,
+                id: router.id,
                 title: random.toString(),
             })
             .expect('Content-Type', /json/)
@@ -79,10 +80,10 @@ describe('account', () => {
 
         // delete test entity
         const response8 = await request(app)
-            .delete('/api/security/group')
+            .delete('/api/db/router')
             .set(headers)
             .send({
-                id: response5.body.id,
+                id: router.id,
             })
             .expect('Content-Type', /json/)
             .expect(200)

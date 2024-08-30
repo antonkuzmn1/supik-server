@@ -2,13 +2,13 @@ import {logger} from "../../logger";
 import {Request, Response} from "express";
 import {prisma} from "../../prisma";
 
-export class AccountService {
+export class SecurityGroupService {
     constructor() {
-        logger.debug('AccountService');
+        logger.debug('SecurityGroupService');
     }
 
     async get(req: Request, res: Response) {
-        logger.debug('AccountService.get');
+        logger.debug('SecurityGroupService.get');
         try {
             if (req.query.id) {
 
@@ -18,7 +18,7 @@ export class AccountService {
                     return res.status(403).send('ID is undefined');
                 }
 
-                const response = await prisma.account.findUnique({
+                const response = await prisma.group.findUnique({
                     where: {
                         id: id,
                         deleted: 0,
@@ -26,7 +26,7 @@ export class AccountService {
                     include: {
                         accountGroups: {
                             include: {
-                                group: true,
+                                account: true,
                             },
                         },
                     },
@@ -40,14 +40,14 @@ export class AccountService {
 
             } else {
 
-                const response = await prisma.account.findMany({
+                const response = await prisma.group.findMany({
                     where: {
                         deleted: 0,
                     },
                     include: {
                         accountGroups: {
                             include: {
-                                group: true,
+                                account: true,
                             },
                         },
                     },
@@ -64,35 +64,24 @@ export class AccountService {
     }
 
     async post(req: Request, res: Response) {
-        logger.debug('AccountService.post');
+        logger.debug('SecurityGroupService.post');
         try {
 
             const {
-                username,
-                password,
-                fullname,
+                name,
                 title,
-                admin,
-                disabled,
+                accessRouters,
+                accessUsers,
+                accountGroups,
             } = req.body;
 
-            if (!username) {
-                logger.error('"username" field required');
-                return res.status(400).send('Username field required');
-            }
-            if (!password) {
-                logger.error('"password" field required');
-                return res.status(400).send('"password" field required');
-            }
-
-            const response = await prisma.account.create({
+            const response = await prisma.group.create({
                 data: {
-                    username,
-                    password,
-                    fullname,
+                    name,
                     title,
-                    admin,
-                    disabled,
+                    accessRouters,
+                    accessUsers,
+                    accountGroups,
                 },
             });
 
@@ -106,7 +95,7 @@ export class AccountService {
     }
 
     async put(req: Request, res: Response) {
-        logger.debug('AccountService.put');
+        logger.debug('SecurityGroupService.put');
         try {
 
             const id = Number(req.body.id);
@@ -116,25 +105,23 @@ export class AccountService {
             }
 
             const {
-                username,
-                password,
-                fullname,
+                name,
                 title,
-                admin,
-                disabled,
+                accessRouters,
+                accessUsers,
+                accountGroups,
             } = req.body;
 
-            const response = await prisma.account.update({
+            const response = await prisma.group.update({
                 where: {
                     id,
                 },
                 data: {
-                    username,
-                    password,
-                    fullname,
+                    name,
                     title,
-                    admin,
-                    disabled,
+                    accessRouters,
+                    accessUsers,
+                    accountGroups,
                 },
             });
 
@@ -148,7 +135,7 @@ export class AccountService {
     }
 
     async delete(req: Request, res: Response) {
-        logger.debug('AccountService.delete');
+        logger.debug('SecurityGroupService.delete');
         try {
 
             const id = Number(req.body.id);
@@ -157,7 +144,7 @@ export class AccountService {
                 return res.status(403).send('ID is undefined');
             }
 
-            const response = await prisma.account.update({
+            const response = await prisma.group.update({
                 where: {
                     id,
                 },

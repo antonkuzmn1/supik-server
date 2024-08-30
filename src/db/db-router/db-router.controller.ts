@@ -1,14 +1,14 @@
 import {Router} from "express";
-import {RouterService} from "./router.service";
+import {DbRouterService} from "./db-router.service";
 import {SecurityMiddleware} from "../../security/security.middleware";
-import {RouterRepository} from "./router.repository";
-import {RouterMiddleware} from "./router.middleware";
+import {DbRouterRepository} from "./db-router.repository";
+import {DbRouterMiddleware} from "./db-router.middleware";
 
 const security = new SecurityMiddleware();
-const middleware = new RouterMiddleware();
-const service = new RouterService(new RouterRepository());
+const middleware = new DbRouterMiddleware();
+const service = new DbRouterService(new DbRouterRepository());
 
-// /api/db/router
+// /api/db/db-router
 export const dbRouterController = Router()
 
 dbRouterController.get(

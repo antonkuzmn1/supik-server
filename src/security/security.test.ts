@@ -11,7 +11,7 @@ app.use('/api', router);
 describe('security', () => {
     test('e2e', async () => {
 
-        // get account
+        // get security-account
         const root = (await prisma.account.findUnique({
             where: {
                 id: 1
@@ -33,7 +33,7 @@ describe('security', () => {
         const token = response.body.token;
         const headers = {'Authorization': `Bearer ${token}`}
 
-        // get account by token
+        // get security-account by token
         const response2 = await request(app)
             .get('/api/security')
             .set(headers)

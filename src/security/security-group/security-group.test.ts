@@ -10,10 +10,10 @@ app.use('/api', router);
 
 const random: number = Math.floor(Math.random() * 100 * 100 * 100 * 100);
 
-describe('account', () => {
+describe('security-account', () => {
     test('e2e', async () => {
 
-        // get account
+        // get security-account
         const root = (await prisma.account.findUnique({
             where: {
                 id: 1
@@ -37,20 +37,18 @@ describe('account', () => {
 
         // create test entity
         const response2 = await request(app)
-            .post('/api/security/account')
+            .post('/api/security/group')
             .set(headers)
             .send({
-                username: random.toString(),
-                password: random.toString(),
-                fullname: random.toString(),
+                name: random.toString(),
             })
             .expect('Content-Type', /json/)
             .expect(200)
-        expect(response2.body.username).toBe(random.toString());
+        expect(response2.body.name).toBe(random.toString());
 
         // find all
         const response3 = await request(app)
-            .get('/api/security/account')
+            .get('/api/security/group')
             .set(headers)
             .expect('Content-Type', /json/)
             .expect(200)
@@ -58,18 +56,18 @@ describe('account', () => {
 
         // find test entity
         const response4 = await request(app)
-            .get('/api/security/account')
+            .get('/api/security/group')
             .query({
                 id: response2.body.id,
             })
             .set(headers)
             .expect('Content-Type', /json/)
             .expect(200)
-        expect(response4.body.username).toBe(response2.body.username);
+        expect(response4.body.name).toBe(response2.body.name);
 
         // update test entity
         const response5 = await request(app)
-            .put('/api/security/account')
+            .put('/api/security/group')
             .set(headers)
             .send({
                 id: response4.body.id,
@@ -81,7 +79,7 @@ describe('account', () => {
 
         // delete test entity
         const response8 = await request(app)
-            .delete('/api/security/account')
+            .delete('/api/security/group')
             .set(headers)
             .send({
                 id: response5.body.id,

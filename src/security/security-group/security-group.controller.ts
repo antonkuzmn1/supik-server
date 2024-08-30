@@ -1,35 +1,35 @@
 import {Router} from "express";
 import {SecurityMiddleware} from "../security.middleware";
-import {GroupService} from "./group.service";
+import {SecurityGroupService} from "./security-group.service";
 
 const security = new SecurityMiddleware();
-const service = new GroupService();
+const service = new SecurityGroupService();
 
-// /api/security/group
-export const groupController = Router();
+// /api/security/security-group
+export const securityGroupController = Router();
 
-groupController.get(
+securityGroupController.get(
     '/',
     security.getAccountFromToken,
     security.accountShouldBeAdmin,
     service.get,
 );
 
-groupController.post(
+securityGroupController.post(
     '/',
     security.getAccountFromToken,
     security.accountShouldBeAdmin,
     service.post,
 );
 
-groupController.put(
+securityGroupController.put(
     '/',
     security.getAccountFromToken,
     security.accountShouldBeAdmin,
     service.put,
 );
 
-groupController.delete(
+securityGroupController.delete(
     '/',
     security.getAccountFromToken,
     security.accountShouldBeAdmin,

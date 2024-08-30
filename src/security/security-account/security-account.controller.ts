@@ -1,35 +1,35 @@
 import {Router} from "express";
 import {SecurityMiddleware} from "../security.middleware";
-import {AccountService} from "./account.service";
+import {SecurityAccountService} from "./security-account.service";
 
 const security = new SecurityMiddleware();
-const service = new AccountService();
+const service = new SecurityAccountService();
 
-// /api/security/account
-export const accountController = Router();
+// /api/security/security-account
+export const securityAccountController = Router();
 
-accountController.get(
+securityAccountController.get(
     '/',
     security.getAccountFromToken,
     security.accountShouldBeAdmin,
     service.get,
 );
 
-accountController.post(
+securityAccountController.post(
     '/',
     security.getAccountFromToken,
     security.accountShouldBeAdmin,
     service.post,
 );
 
-accountController.put(
+securityAccountController.put(
     '/',
     security.getAccountFromToken,
     security.accountShouldBeAdmin,
     service.put,
 );
 
-accountController.delete(
+securityAccountController.delete(
     '/',
     security.getAccountFromToken,
     security.accountShouldBeAdmin,

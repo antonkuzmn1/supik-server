@@ -1,9 +1,9 @@
 import {Router} from "express";
-import {dbRouterController} from "./router/router.controller";
-import {dbRouterGroupViewerController} from "./router-group-viewer/router-group-viewer.controller";
-import {dbRouterGroupEditorController} from "./router-group-editor/router-group-editor.controller";
-import {dbUserController} from "./user/user.controller";
-import {dbVpnController} from "./vpn/vpn.controller";
+import {dbRouterController} from "./db-router/db-router.controller";
+import {dbRouterGroupViewerController} from "./db-router-group-viewer/db-router-group-viewer.controller";
+import {dbRouterGroupEditorController} from "./db-router-group-editor/db-router-group-editor.controller";
+import {dbUserController} from "./db-user/db-user.controller";
+import {dbVpnController} from "./db-vpn/db-vpn.controller";
 
 // /api/db
 export const dbController = Router()

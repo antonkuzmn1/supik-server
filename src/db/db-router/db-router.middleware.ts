@@ -2,9 +2,9 @@ import {logger} from "../../logger";
 import {NextFunction, Request, Response} from "express";
 import {AccountGroup, Group} from "@prisma/client";
 
-const className = 'RouterMiddleware';
+const className = 'DbRouterMiddleware';
 
-export class RouterMiddleware {
+export class DbRouterMiddleware {
 
     constructor() {
         logger.debug(className);

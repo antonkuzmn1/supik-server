@@ -1,21 +1,21 @@
 import {Router} from "express";
 import {SecurityMiddleware} from "../security.middleware";
-import {AccountGroupService} from "./account-group.service";
+import {SecurityAccountGroupService} from "./security-account-group.service";
 
 const security = new SecurityMiddleware();
-const service = new AccountGroupService();
+const service = new SecurityAccountGroupService();
 
-// /api/security/account-group
-export const accountGroupController = Router()
+// /api/security/security-account-security-group
+export const securityAccountGroupController = Router()
 
-accountGroupController.post(
+securityAccountGroupController.post(
     '/',
     security.getAccountFromToken,
     security.accountShouldBeAdmin,
     service.post
 );
 
-accountGroupController.delete(
+securityAccountGroupController.delete(
     '/',
     security.getAccountFromToken,
     security.accountShouldBeAdmin,

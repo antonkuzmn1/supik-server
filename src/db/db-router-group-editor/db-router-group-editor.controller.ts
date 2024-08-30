@@ -1,4 +1,4 @@
 import {Router} from "express";
 
-// /api/db/router-group-editor
+// /api/db/db-db-router-security-group-editor
 export const dbRouterGroupEditorController = Router()

@@ -10,10 +10,10 @@ app.use('/api', router);
 
 const random: number = Math.floor(Math.random() * 100 * 100 * 100 * 100);
 
-describe('account-group', () => {
+describe('security-account-group', () => {
     test('e2e', async () => {
 
-        // get account
+        // get security-account
         const root = (await prisma.account.findUnique({
             where: {
                 id: 1
@@ -35,7 +35,7 @@ describe('account-group', () => {
         const token = responseWithToken.body.token;
         const headers = {'Authorization': `Bearer ${token}`}
 
-        // create test entity account
+        // create test entity security-account
         const responseWithAccount = await request(app)
             .post('/api/security/account')
             .set(headers)
@@ -49,7 +49,7 @@ describe('account-group', () => {
         expect(responseWithAccount.body.username).toBe(random.toString());
         const account: Account = responseWithAccount.body;
 
-        // create test entity group
+        // create test entity security-group
         const responseWithGroup = await request(app)
             .post('/api/security/group')
             .set(headers)
@@ -84,7 +84,7 @@ describe('account-group', () => {
             .expect('Content-Type', /json/)
             .expect(200)
 
-        // delete test entity account
+        // delete test entity security-account
         const responseWithDeletedAccount = await request(app)
             .delete('/api/security/account')
             .set(headers)
@@ -95,7 +95,7 @@ describe('account-group', () => {
             .expect(200)
         expect(responseWithDeletedAccount.body.deleted).toBe(1);
 
-        // delete test entity group
+        // delete test entity security-group
         const responseWithDeletedGroup = await request(app)
             .delete('/api/security/group')
             .set(headers)

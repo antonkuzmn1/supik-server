@@ -2,13 +2,13 @@ import {logger} from "../../logger";
 import {Request, Response} from "express";
 import {prisma} from "../../prisma";
 
-export class AccountGroupService {
+export class SecurityAccountGroupService {
     constructor() {
-        logger.debug('AccountGroupService');
+        logger.debug('SecurityAccountGroupService');
     }
 
     async post(req: Request, res: Response) {
-        logger.debug('AccountGroupService.post');
+        logger.debug('SecurityAccountGroupService.post');
         try {
 
             const {
@@ -42,7 +42,7 @@ export class AccountGroupService {
     }
 
     async delete(req: Request, res: Response) {
-        logger.debug('AccountGroupService.delete');
+        logger.debug('SecurityAccountGroupService.delete');
         try {
 
             const {
