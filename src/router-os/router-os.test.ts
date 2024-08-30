@@ -10,9 +10,9 @@ app.use('/api', router);
 
 // const random: number = Math.floor(Math.random() * 100 * 100 * 100 * 100);
 
-const host = '192.168.88.1';
-const user = 'user';
-const password = 'password';
+const host = process.env.TEST_ROUTER_HOST as string;
+const user = process.env.TEST_ROUTER_USER as string;
+const password = process.env.TEST_ROUTER_PASSWORD as string;
 const idString = '*4';
 
 describe('router-os', () => {

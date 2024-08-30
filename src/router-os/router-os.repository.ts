@@ -4,8 +4,8 @@ import {IRosGenericResponse} from "node-routeros/dist/IRosGenericResponse";
 
 const className = 'RouterOsRepository';
 
-const port = 8728;
-const timeout = 30000;
+const port = process.env.TEST_ROUTER_PORT as any as number;
+const timeout = process.env.TEST_ROUTER_TIMEOUT as any as number;
 
 export class RouterOsRepository {
     constructor() {
