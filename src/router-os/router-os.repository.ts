@@ -33,7 +33,7 @@ export class RouterOsRepository {
         profile: string,
         remoteAddress: string,
         service: string = 'any',
-        disabled: string = 'false',
+        disabled: string = 'no',
     ): Promise<IRosGenericResponse> => {
         logger.debug(className + '.create');
 
@@ -49,7 +49,7 @@ export class RouterOsRepository {
 
     update = async (
         api: RouterOSAPI,
-        idString: string,
+        id: string,
         name?: string,
         password?: string,
         profile?: string,
@@ -59,7 +59,7 @@ export class RouterOsRepository {
     ): Promise<IRosGenericResponse> => {
         logger.debug(className + '.update');
 
-        const params: string[] = [`=.id=${idString}`];
+        const params: string[] = [`=.id=${id}`];
 
         if (name !== undefined) params.push(`=name=${name}`);
         if (password !== undefined) params.push(`=password=${password}`);
@@ -73,11 +73,11 @@ export class RouterOsRepository {
 
     delete = async (
         api: RouterOSAPI,
-        idString: string,
+        id: string,
     ): Promise<IRosGenericResponse> => {
         logger.debug(className + '.delete');
 
-        return api.write('/ppp/secret/remove', [`=.id=${idString}`]);
+        return api.write('/ppp/secret/remove', [`=.id=${id}`]);
     }
 
 }

@@ -85,7 +85,7 @@ export class RouterOsService implements CrudInterface {
         try {
             const api: RouterOSAPI = req.body.api;
 
-            const idString = req.body.idString as string;
+            const id = req.body.idString as string;
             const name = req.body.name as string;
             const password = req.body.password as string;
             const profile = req.body.profile as string;
@@ -95,7 +95,7 @@ export class RouterOsService implements CrudInterface {
 
             await this.repository.update(
                 api,
-                idString,
+                id,
                 name,
                 password,
                 profile,
@@ -104,7 +104,7 @@ export class RouterOsService implements CrudInterface {
                 disabled,
             );
 
-            const vpn = await this.repository.findUnique(api, idString);
+            const vpn = await this.repository.findUnique(api, id);
             return res.status(200).json(vpn[0]);
         } catch (error) {
             console.error(error);
@@ -118,11 +118,11 @@ export class RouterOsService implements CrudInterface {
         try {
             const api: RouterOSAPI = req.body.api;
 
-            const idString = req.body.idString as string;
+            const id = req.body.idString as string;
 
             const result = await this.repository.delete(
                 api,
-                idString,
+                id,
             );
 
             return res.status(200).json(result);

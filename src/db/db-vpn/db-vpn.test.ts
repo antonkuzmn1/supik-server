@@ -10,6 +10,11 @@ app.use('/api', router);
 
 const random: number = Math.floor(Math.random() * 100 * 100 * 100 * 100);
 
+const host = process.env.TEST_ROUTER_HOST as string;
+const user = process.env.TEST_ROUTER_USER as string;
+const password = process.env.TEST_ROUTER_PASSWORD as string;
+const remoteAddress = process.env.TEST_ROUTER_REMOTE_ADDRESS as string;
+
 describe('db-vpn', () => {
     test('e2e', async () => {
 
@@ -40,11 +45,13 @@ describe('db-vpn', () => {
             .post('/api/db/router')
             .set(headers)
             .send({
-                login: random.toString(),
+                localAddress: host,
+                login: user,
+                password: password,
             })
             .expect('Content-Type', /json/)
             .expect(200)
-        expect(responseWithRouter.body.login).toBe(random.toString());
+        expect(responseWithRouter.body.login).toBe(user);
         const router: Router = responseWithRouter.body;
 
         const responseWithVpn = await request(app)
@@ -52,11 +59,14 @@ describe('db-vpn', () => {
             .set(headers)
             .send({
                 routerId: router.id,
-                name: random.toString(),
+                name: `test_${random.toString()}`,
+                password: `test_${random.toString()}`,
+                profile: 'default',
+                remoteAddress: remoteAddress,
             })
             .expect('Content-Type', /json/)
             .expect(200)
-        expect(responseWithVpn.body.name).toBe(random.toString());
+        expect(responseWithVpn.body.name).toBe(`test_${random.toString()}`);
         const vpn = responseWithVpn.body;
 
         // find all
@@ -72,6 +82,7 @@ describe('db-vpn', () => {
             .get('/api/db/vpn')
             .query({
                 id: vpn.id,
+                routerId: router.id
             })
             .set(headers)
             .expect('Content-Type', /json/)
@@ -84,10 +95,13 @@ describe('db-vpn', () => {
             .set(headers)
             .send({
                 id: vpn.id,
+                routerId: router.id,
                 title: random.toString(),
+                name: `test_updated_${random.toString()}`,
             })
             .expect('Content-Type', /json/)
             .expect(200)
+        expect(response5.body.name).toBe(`test_updated_${random.toString()}`);
         expect(response5.body.title).toBe(random.toString());
 
         // delete test entity
@@ -96,6 +110,7 @@ describe('db-vpn', () => {
             .set(headers)
             .send({
                 id: vpn.id,
+                routerId: router.id,
             })
             .expect('Content-Type', /json/)
             .expect(200)

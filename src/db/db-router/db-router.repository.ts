@@ -1,11 +1,10 @@
-import {Router, RouterGroupEditor, RouterGroupViewer, Vpn} from "@prisma/client";
+import {Router, RouterGroupEditor, RouterGroupViewer} from "@prisma/client";
 import {logger} from "../../logger";
 import {prisma} from "../../prisma";
 
 const className = 'DbRouterRepository'
 
 export interface RouterExtended extends Router {
-    vpns: Vpn[],
     routerGroupViewer: RouterGroupViewer[],
     routerGroupEditor: RouterGroupEditor[],
 }
@@ -23,7 +22,6 @@ export class DbRouterRepository {
                 deleted: 0,
             },
             include: {
-                vpns: true,
                 routerGroupViewer: {
                     include: {
                         group: true,
@@ -45,7 +43,6 @@ export class DbRouterRepository {
                 deleted: 0,
             },
             include: {
-                vpns: true,
                 routerGroupViewer: {
                     include: {
                         group: true,
@@ -75,7 +72,6 @@ export class DbRouterRepository {
         return prisma.router.create({
             data: data,
             include: {
-                vpns: true,
                 routerGroupViewer: {
                     include: {
                         group: true,
@@ -107,7 +103,6 @@ export class DbRouterRepository {
             where: {id: data.id},
             data: data,
             include: {
-                vpns: true,
                 routerGroupViewer: {
                     include: {
                         group: true,
@@ -132,7 +127,6 @@ export class DbRouterRepository {
                 deleted: 1,
             },
             include: {
-                vpns: true,
                 routerGroupViewer: {
                     include: {
                         group: true,

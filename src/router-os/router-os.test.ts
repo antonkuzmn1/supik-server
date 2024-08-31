@@ -59,6 +59,7 @@ describe('router-os', () => {
             .expect(200)
         expect(responseWithNewEntity.body.name).toBe('test_' + random.toString());
         const idString: string = responseWithNewEntity.body['.id'];
+        console.log(responseWithNewEntity.body);
 
         // find all
         const response3 = await request(app)

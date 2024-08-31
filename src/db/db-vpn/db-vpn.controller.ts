@@ -2,9 +2,13 @@ import {Router} from "express";
 import {SecurityMiddleware} from "../../security/security.middleware";
 import {DbVpnService} from "./db-vpn.service";
 import {DbVpnRepository} from "./db-vpn.repository";
+import {RouterOsRepository} from "../../router-os/router-os.repository";
 
 const security = new SecurityMiddleware();
-const service = new DbVpnService(new DbVpnRepository());
+const service = new DbVpnService(
+    new DbVpnRepository(),
+    new RouterOsRepository(),
+);
 
 // /api/db/vpn
 export const dbVpnController = Router()

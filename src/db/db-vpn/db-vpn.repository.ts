@@ -8,11 +8,14 @@ export class DbVpnRepository {
         logger.debug(className);
     }
 
-    findUnique = async (id: number): Promise<any> => {
+    findUnique = async (id: string, routerId: number): Promise<any> => {
         logger.debug(className + '.findUnique');
         return prisma.vpn.findUnique({
             where: {
-                id: id,
+                id_routerId: {
+                    id,
+                    routerId,
+                },
                 deleted: 0,
             },
             include: {
@@ -35,18 +38,20 @@ export class DbVpnRepository {
         });
     }
 
-    create = async (data: {
-        idString: string,
-        name: string,
-        password: string,
-        service: string,
-        localAddress: string,
-        remoteAddress: string,
-        title: string,
-        disabled: 0 | 1,
-        routerId: number,
-        userId: number,
-    }): Promise<any> => {
+    create = async (
+        data: {
+            id: string,
+            name: string,
+            password: string,
+            profile: string,
+            remoteAddress: string,
+            service: string,
+            disabled: 0 | 1,
+            title: string,
+            routerId: number,
+            userId: number,
+        }
+    ): Promise<any> => {
         logger.debug(className + '.create');
         return prisma.vpn.create({
             data: data,
@@ -57,22 +62,28 @@ export class DbVpnRepository {
         });
     }
 
-    update = async (data: {
-        id: number,
-        idString: string,
-        name: string,
-        password: string,
-        service: string,
-        localAddress: string,
-        remoteAddress: string,
-        title: string,
-        disabled: 0 | 1,
-        routerId: number,
-        userId: number,
-    }): Promise<any> => {
+    update = async (
+        data: {
+            id: string,
+            name: string,
+            password: string,
+            profile: string,
+            remoteAddress: string,
+            service: string,
+            disabled: 0 | 1,
+            title: string,
+            routerId: number,
+            userId: number,
+        }
+    ): Promise<any> => {
         logger.debug(className + '.update');
         return prisma.vpn.update({
-            where: {id: data.id},
+            where: {
+                id_routerId: {
+                    id: data.id,
+                    routerId: data.routerId,
+                },
+            },
             data: data,
             include: {
                 router: true,
@@ -81,11 +92,14 @@ export class DbVpnRepository {
         });
     }
 
-    delete = async (id: number): Promise<any> => {
+    delete = async (id: string, routerId: number): Promise<any> => {
         logger.debug(className + '.delete');
         return prisma.vpn.update({
             where: {
-                id,
+                id_routerId: {
+                    id,
+                    routerId,
+                },
             },
             data: {
                 deleted: 1,

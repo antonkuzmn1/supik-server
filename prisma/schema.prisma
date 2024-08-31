@@ -95,12 +95,11 @@ model RouterGroupEditor {
 }
 
 model Vpn {
-  id      Int      @id @default(autoincrement())
+  id      String
   created DateTime @default(now()) @db.Timestamp(0)
   updated DateTime @updatedAt @db.Timestamp()
   deleted Int      @default(0) @db.TinyInt()
 
-  idString      String @default("") @db.VarChar(10)
   name          String @default("") @db.VarChar(100)
   password      String @default("") @db.VarChar(100)
   profile       String @default("") @db.VarChar(50)
@@ -114,6 +113,8 @@ model Vpn {
 
   router Router @relation(fields: [routerId], references: [id])
   user   User?  @relation(fields: [userId], references: [id])
+
+  @@id([id, routerId])
 }
 
 model User {
