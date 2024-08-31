@@ -19,6 +19,7 @@ limitations under the License.
 import {logger} from "../../logger";
 import {Request, Response} from "express";
 import {prisma} from "../../prisma";
+import bcrypt from "bcrypt";
 
 export class SecurityAccountService {
     constructor() {
@@ -113,10 +114,12 @@ export class SecurityAccountService {
                 return res.status(400).send('"password" field required');
             }
 
+            const passwordEncrypted = await bcrypt.hash(password, 10);
+
             const response = await prisma.account.create({
                 data: {
                     username,
-                    password,
+                    password: passwordEncrypted,
                     fullname,
                     title,
                     admin,
@@ -152,13 +155,15 @@ export class SecurityAccountService {
                 disabled,
             } = req.body;
 
+            const passwordEncrypted = await bcrypt.hash(password, 10);
+
             const response = await prisma.account.update({
                 where: {
                     id,
                 },
                 data: {
                     username,
-                    password,
+                    password: passwordEncrypted,
                     fullname,
                     title,
                     admin,
