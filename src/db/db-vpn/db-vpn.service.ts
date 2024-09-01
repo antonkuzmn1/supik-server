@@ -296,181 +296,237 @@ export class DbVpnService implements CrudInterface {
 
     private create = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.create');
+        try {
 
-        const routerId = Number(req.body.routerId);
-        if (!routerId) {
-            logger.error('Router ID is undefined');
-            return res.status(403).send('Router ID is undefined');
+            const routerId = Number(req.body.routerId);
+            if (!routerId) {
+                logger.error('Router ID is undefined');
+                return res.status(403).send('Router ID is undefined');
+            }
+            logger.debug(`Router ID: ${routerId}`);
+
+            const router = await prisma.router.findUnique({
+                where: {
+                    id: routerId,
+                    deleted: 0,
+                },
+            });
+            if (!router) {
+                logger.error('Router not found');
+                return res.status(400).send('Router not found');
+            }
+            logger.debug(`Founded router name: ${router.name}`);
+
+            console.log('Before Router OS Connect:', router);
+            const routerOSAPI = new RouterOSAPI({
+                host: router.localAddress,
+                user: router.login,
+                password: router.password,
+                port: Number(process.env.TEST_ROUTER_PORT),
+                timeout: Number(process.env.TEST_ROUTER_TIMEOUT),
+            });
+            const api = await routerOSAPI.connect();
+            if (!api.connected) {
+                logger.error('Connection failed');
+                return res.status(400).send('Connection failed');
+            } else {
+                logger.info('Successfully connected');
+            }
+
+            console.log('Before Router OS Create:', req.body);
+            const raw = await this.routerOsRepository.create(
+                api,
+                req.body.name,
+                req.body.password,
+                req.body.profile,
+                req.body.remoteAddress,
+                req.body.service,
+                req.body.disabled ? 'yes' : 'no',
+            );
+            const vpn = (await this.routerOsRepository.findUnique(api, raw[0].ret as any as string))[0];
+            if (!vpn) {
+                logger.error('VPN not created by Router OS');
+                return res.status(403).send('VPN not created by Router OS');
+            } else {
+                logger.debug('VPN successfully created by Router OS')
+            }
+
+            console.log('Before Prisma Create', vpn);
+            const response = await this.repository.create({
+                id: vpn['.id'],
+                name: vpn.name,
+                password: vpn.password,
+                profile: vpn.profile,
+                remoteAddress: vpn['remote-address'],
+                service: vpn.service,
+                disabled: vpn.disabled === 'true' ? 1 : 0,
+                title: req.body.title,
+                routerId: routerId,
+                userId: req.body.userId > 0 ? req.body.userId : null,
+            });
+            console.log('Response Prisma:', response);
+
+            return res.status(200).json(response);
+        } catch (error: any) {
+            console.error(error);
+            const message = error.message ? error.message : 'Internal Server Error';
+            logger.error(message);
+            return res.status(500).send(message);
         }
-
-        const router = await prisma.router.findUnique({
-            where: {
-                id: routerId,
-                deleted: 0,
-            },
-        });
-        if (!router) {
-            logger.error('Router not found');
-            return res.status(400).send('Router not found');
-        }
-
-        const routerOSAPI = new RouterOSAPI({
-            host: router.localAddress,
-            user: router.login,
-            password: router.password,
-            port: Number(process.env.TEST_ROUTER_PORT),
-            timeout: Number(process.env.TEST_ROUTER_TIMEOUT),
-        });
-        const api = await routerOSAPI.connect();
-        if (!api.connected) {
-            logger.error('Connection failed');
-            return res.status(400).send('Connection failed');
-        } else {
-            logger.info('Successfully connected');
-        }
-
-        const raw = await this.routerOsRepository.create(
-            api,
-            req.body.name,
-            req.body.password,
-            req.body.profile,
-            req.body.remoteAddress,
-            req.body.service,
-            req.body.disabled ? 'yes' : 'no',
-        );
-        const vpn = (await this.routerOsRepository.findUnique(api, raw[0].ret as any as string))[0];
-
-        const response = await this.repository.create({
-            id: vpn['.id'],
-            name: vpn.name,
-            password: vpn.password,
-            profile: vpn.profile,
-            remoteAddress: vpn['remote-address'],
-            service: vpn.service,
-            disabled: vpn.disabled === 'true' ? 1 : 0,
-            title: req.body.title,
-            routerId: routerId,
-            userId: req.body.userId,
-        });
-
-        return res.status(200).json(response);
     }
 
     private update = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.update');
+        try {
+            const routerId = Number(req.body.routerId);
+            if (!routerId) {
+                logger.error('Router ID is undefined');
+                return res.status(403).send('Router ID is undefined');
+            }
+            logger.debug(`Router ID: ${routerId}`);
 
-        const routerId = Number(req.body.routerId);
-        if (!routerId) {
-            logger.error('Router ID is undefined');
-            return res.status(403).send('Router ID is undefined');
+            const id = req.body.id;
+            if (!id) {
+                logger.error('ID is undefined');
+                return res.status(403).send('ID is undefined');
+            }
+            logger.debug(`VPN ID: ${routerId}`);
+
+            const router = await prisma.router.findUnique({
+                where: {
+                    id: routerId,
+                    deleted: 0,
+                },
+            });
+            if (!router) {
+                logger.error('Router not found');
+                return res.status(400).send('Router not found');
+            }
+            logger.debug(`Founded router name: ${router.name}`);
+
+            console.log('Before Router OS Connect:', router);
+            const routerOSAPI = new RouterOSAPI({
+                host: router.localAddress,
+                user: router.login,
+                password: router.password,
+                port: Number(process.env.TEST_ROUTER_PORT),
+                timeout: Number(process.env.TEST_ROUTER_TIMEOUT),
+            });
+            const api = await routerOSAPI.connect();
+            if (!api.connected) {
+                return res.status(400).send('Connection failed');
+            }
+            logger.info(`Successfully connected to: ${router.localAddress}`);
+
+            console.log('Before Router OS Update:', req.body);
+            await this.routerOsRepository.update(
+                api,
+                id,
+                req.body.name,
+                req.body.password,
+                req.body.profile,
+                req.body.remoteAddress,
+                req.body.service,
+                req.body.disabled ? 'yes' : 'no',
+            );
+            const vpn = (await this.routerOsRepository.findUnique(api, id))[0];
+            if (!vpn) {
+                logger.error('VPN not updated by Router OS');
+                return res.status(403).send('VPN not updated by Router OS');
+            } else {
+                logger.debug('VPN successfully updated by Router OS');
+            }
+
+            console.log('Before Prisma Update (RouterOS)', vpn);
+            console.log('Before Prisma Update (Request):', req.body);
+            const response = await this.repository.update({
+                id: vpn['.id'],
+                name: vpn.name,
+                password: vpn.password,
+                profile: vpn.profile,
+                remoteAddress: vpn['remote-address'],
+                service: vpn.service,
+                disabled: vpn.disabled === 'true' ? 1 : 0,
+                title: req.body.title,
+                routerId: routerId,
+                userId: req.body.userId > 0 ? req.body.userId : null,
+            });
+            console.log('Response Prisma:', response);
+
+            return res.status(200).json(response);
+        } catch (error: any) {
+            console.error(error);
+            const message = error.message ? error.message : 'Internal Server Error';
+            logger.error(message);
+            return res.status(500).send(message);
         }
-
-        const id = req.body.id;
-        if (!id) {
-            logger.error('ID is undefined');
-            return res.status(403).send('ID is undefined');
-        }
-
-        const router = await prisma.router.findUnique({
-            where: {
-                id: routerId,
-                deleted: 0,
-            },
-        });
-        if (!router) {
-            logger.error('Router not found');
-            return res.status(400).send('Router not found');
-        }
-
-        const routerOSAPI = new RouterOSAPI({
-            host: router.localAddress,
-            user: router.login,
-            password: router.password,
-            port: Number(process.env.TEST_ROUTER_PORT),
-            timeout: Number(process.env.TEST_ROUTER_TIMEOUT),
-        });
-        const api = await routerOSAPI.connect();
-        if (!api.connected) {
-            return res.status(400).send('Connection failed');
-        }
-
-        await this.routerOsRepository.update(
-            api,
-            id,
-            req.body.name,
-            req.body.password,
-            req.body.profile,
-            req.body.remoteAddress,
-            req.body.service,
-            req.body.disabled ? 'yes' : 'no',
-        );
-        const vpn = (await this.routerOsRepository.findUnique(api, id))[0];
-
-        const response = await this.repository.update({
-            id: vpn['.id'],
-            name: vpn.name,
-            password: vpn.password,
-            profile: vpn.profile,
-            remoteAddress: vpn['remote-address'],
-            service: vpn.service,
-            disabled: vpn.disabled === 'true' ? 1 : 0,
-            title: req.body.title,
-            routerId: routerId,
-            userId: req.body.userId,
-        });
-
-        return res.status(200).json(response);
     }
 
     private softDelete = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.softDelete');
+        try {
 
-        const routerId = Number(req.body.routerId);
-        if (!routerId) {
-            logger.error('Router ID is undefined');
-            return res.status(403).send('Router ID is undefined');
+            const routerId = Number(req.body.routerId);
+            if (!routerId) {
+                logger.error('Router ID is undefined');
+                return res.status(403).send('Router ID is undefined');
+            }
+            logger.debug(`Router ID: ${routerId}`);
+
+            const id = req.body.id;
+            if (!id) {
+                logger.error('ID is undefined');
+                return res.status(403).send('ID is undefined');
+            }
+            logger.debug(`VPN ID: ${routerId}`);
+
+            const router = await prisma.router.findUnique({
+                where: {
+                    id: routerId,
+                },
+            });
+            if (!router) {
+                logger.error('Router not found');
+                return res.status(400).send('Router not found');
+            }
+            if (router.deleted === 1) {
+                const response = await this.repository.delete(
+                    id,
+                    routerId,
+                );
+
+                return res.status(200).json(response);
+            }
+
+            const routerOSAPI = new RouterOSAPI({
+                host: router.localAddress,
+                user: router.login,
+                password: router.password,
+                port: Number(process.env.TEST_ROUTER_PORT),
+                timeout: Number(process.env.TEST_ROUTER_TIMEOUT),
+            });
+            const api = await routerOSAPI.connect();
+            if (!api.connected) {
+                return res.status(400).send('Connection failed');
+            }
+
+            await this.routerOsRepository.delete(
+                api,
+                id,
+            );
+
+            const response = await this.repository.delete(
+                id,
+                routerId,
+            );
+
+            return res.status(200).json(response);
+        } catch (error: any) {
+            console.error(error);
+            const message = error.message ? error.message : 'Internal Server Error';
+            logger.error(message);
+            return res.status(500).send(message);
         }
-
-        const id = req.body.id;
-        if (!id) {
-            logger.error('ID is undefined');
-            return res.status(403).send('ID is undefined');
-        }
-
-        const router = await prisma.router.findUnique({
-            where: {
-                id: routerId,
-                deleted: 0,
-            },
-        });
-        if (!router) {
-            logger.error('Router not found');
-            return res.status(400).send('Router not found');
-        }
-
-        const routerOSAPI = new RouterOSAPI({
-            host: router.localAddress,
-            user: router.login,
-            password: router.password,
-            port: Number(process.env.TEST_ROUTER_PORT),
-            timeout: Number(process.env.TEST_ROUTER_TIMEOUT),
-        });
-        const api = await routerOSAPI.connect();
-        if (!api.connected) {
-            return res.status(400).send('Connection failed');
-        }
-
-        await this.routerOsRepository.delete(
-            api,
-            id,
-        );
-
-        const response = await this.repository.delete(
-            id,
-            routerId,
-        );
-
-        return res.status(200).json(response);
     }
 
 
