@@ -44,10 +44,14 @@ export class RouterOsService implements CrudInterface {
 
             const vpn = await this.repository.findUnique(api, idString);
             return res.status(200).json(vpn[0]);
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
@@ -91,10 +95,14 @@ export class RouterOsService implements CrudInterface {
 
             const vpn = await this.repository.findUnique(api, raw[0].ret as any as string);
             return res.status(200).json(vpn[0]);
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
@@ -124,10 +132,14 @@ export class RouterOsService implements CrudInterface {
 
             const vpn = await this.repository.findUnique(api, id);
             return res.status(200).json(vpn[0]);
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
@@ -144,10 +156,14 @@ export class RouterOsService implements CrudInterface {
             );
 
             return res.status(200).json(result);
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 

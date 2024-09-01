@@ -105,10 +105,14 @@ export class SecurityGroupService {
 
             return res.status(200).json(response);
 
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
@@ -143,10 +147,14 @@ export class SecurityGroupService {
 
             return res.status(200).json(response);
 
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
@@ -171,10 +179,14 @@ export class SecurityGroupService {
 
             return res.status(200).json(response);
 
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 

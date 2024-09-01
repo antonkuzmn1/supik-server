@@ -75,10 +75,14 @@ export class SecurityMiddleware {
             logger.info('User found with userId ' + decodedToken.id);
             req.body.account = accountWithGroupIds;
             next();
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
@@ -98,10 +102,14 @@ export class SecurityMiddleware {
 
             logger.info("User is admin");
             next();
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 }

@@ -39,10 +39,14 @@ export class DbUserService implements CrudInterface {
             } else {
                 return this.findMany(req, res);
             }
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
@@ -50,10 +54,14 @@ export class DbUserService implements CrudInterface {
         logger.debug(className + '.post');
         try {
             return this.create(req, res);
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
@@ -61,10 +69,14 @@ export class DbUserService implements CrudInterface {
         logger.debug(className + '.put');
         try {
             return this.update(req, res);
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
@@ -72,52 +84,106 @@ export class DbUserService implements CrudInterface {
         logger.debug(className + '.delete');
         try {
             return this.softDelete(req, res);
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
     private findUnique = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.findUnique');
-        const id = Number(req.query.id);
-        if (!id) {
-            logger.error('ID is undefined');
-            return res.status(403).send('ID is undefined');
+        try {
+            const id = Number(req.query.id);
+            if (!id) {
+                logger.error('ID is undefined');
+                return res.status(403).send('ID is undefined');
+            }
+            const response = await this.repository.findUnique(id);
+            if (!response) {
+                logger.error(`Entity with ID ${id} not found`);
+                return res.status(403).send(`Entity with ID ${id} not found`);
+            }
+            return res.status(200).json(response);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
-        const response = await this.repository.findUnique(id);
-        if (!response) {
-            logger.error(`Entity with ID ${id} not found`);
-            return res.status(403).send(`Entity with ID ${id} not found`);
-        }
-        return res.status(200).json(response);
     }
 
     private findMany = async (_req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.findMany');
-        const response = await this.repository.findMany();
-        return res.status(200).json(response);
+        try {
+            const response = await this.repository.findMany();
+            return res.status(200).json(response);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
+        }
     }
 
     private create = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.create');
-        const { account, ...dataToCreate } = req.body;
-        const response = await this.repository.create(dataToCreate);
-        return res.status(200).json(response);
+        try {
+            const {account, ...dataToCreate} = req.body;
+            const response = await this.repository.create(dataToCreate);
+            return res.status(200).json(response);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
+        }
     }
 
     private update = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.update');
-        const { account, ...dataToCreate } = req.body;
-        const response = await this.repository.update(dataToCreate);
-        return res.status(200).json(response);
+        try {
+            const {account, ...dataToCreate} = req.body;
+            const response = await this.repository.update(dataToCreate);
+            return res.status(200).json(response);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
+        }
     }
 
     private softDelete = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.softDelete');
-        const response = await this.repository.delete(req.body.id);
-        return res.status(200).json(response);
+        try {
+            const response = await this.repository.delete(req.body.id);
+            return res.status(200).json(response);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
+        }
     }
 
 }

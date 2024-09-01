@@ -35,10 +35,14 @@ export class DbRouterGroupEditorService {
         logger.debug(className + '.post');
         try {
             return this.create(req, res);
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
@@ -46,10 +50,14 @@ export class DbRouterGroupEditorService {
         logger.debug(className + '.delete');
         try {
             return this.trueDelete(req, res);
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
@@ -58,15 +66,30 @@ export class DbRouterGroupEditorService {
         try {
             const response = await this.repository.create(req.body.routerId, req.body.groupId);
             return res.status(200).json(response);
-        } catch (error) {
-            console.error(error);
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
     private trueDelete = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.trueDelete');
-        const response = await this.repository.delete(req.body.routerId, req.body.groupId);
-        return res.status(200).json(response);
+        try {
+            const response = await this.repository.delete(req.body.routerId, req.body.groupId);
+            return res.status(200).json(response);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
+        }
     }
 }

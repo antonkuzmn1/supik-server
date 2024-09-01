@@ -126,10 +126,14 @@ export class DbVpnService implements CrudInterface {
                     return this.findMany(req, res);
                 }
             }
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
@@ -165,10 +169,14 @@ export class DbVpnService implements CrudInterface {
             } else {
                 return this.create(req, res);
             }
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
@@ -209,10 +217,14 @@ export class DbVpnService implements CrudInterface {
             } else {
                 return this.update(req, res);
             }
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
@@ -253,45 +265,69 @@ export class DbVpnService implements CrudInterface {
             } else {
                 return this.softDelete(req, res);
             }
-        } catch (error) {
-            console.error(error);
-            logger.error('Internal Server Error');
-            return res.status(500).send('Internal Server Error');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
     private findUnique = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.findUnique');
+        try {
 
-        const id = req.query.id;
-        if (!id) {
-            logger.error('ID is undefined');
-            return res.status(403).send('ID is undefined');
-        }
-        if (typeof id !== 'string') {
-            logger.error(`ID is not a string`);
-            return res.status(403).send('ID is not a string');
-        }
+            const id = req.query.id;
+            if (!id) {
+                logger.error('ID is undefined');
+                return res.status(403).send('ID is undefined');
+            }
+            if (typeof id !== 'string') {
+                logger.error(`ID is not a string`);
+                return res.status(403).send('ID is not a string');
+            }
 
-        const routerId = Number(req.query.routerId);
-        if (!routerId) {
-            logger.error('Router ID is undefined');
-            return res.status(403).send('Router ID is undefined');
-        }
+            const routerId = Number(req.query.routerId);
+            if (!routerId) {
+                logger.error('Router ID is undefined');
+                return res.status(403).send('Router ID is undefined');
+            }
 
-        const vpn = await this.repository.findUnique(id, routerId);
-        if (!vpn) {
-            logger.error(`Entity with ID ${id} not found`);
-            return res.status(403).send(`Entity with ID ${id} not found`);
-        }
+            const vpn = await this.repository.findUnique(id, routerId);
+            if (!vpn) {
+                logger.error(`Entity with ID ${id} not found`);
+                return res.status(403).send(`Entity with ID ${id} not found`);
+            }
 
-        return res.status(200).json(vpn);
+            return res.status(200).json(vpn);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
+        }
     }
 
     private findMany = async (_req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.findMany');
-        const response = await this.repository.findMany();
-        return res.status(200).json(response);
+        try {
+            const response = await this.repository.findMany();
+            return res.status(200).json(response);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
+        }
     }
 
     private create = async (req: Request, res: Response): Promise<Response> => {
@@ -367,11 +403,14 @@ export class DbVpnService implements CrudInterface {
             console.log('Response Prisma:', response);
 
             return res.status(200).json(response);
-        } catch (error: any) {
-            console.error(error);
-            const message = error.message ? error.message : 'Internal Server Error';
-            logger.error(message);
-            return res.status(500).send(message);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
@@ -454,11 +493,14 @@ export class DbVpnService implements CrudInterface {
             console.log('Response Prisma:', response);
 
             return res.status(200).json(response);
-        } catch (error: any) {
-            console.error(error);
-            const message = error.message ? error.message : 'Internal Server Error';
-            logger.error(message);
-            return res.status(500).send(message);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
@@ -521,11 +563,14 @@ export class DbVpnService implements CrudInterface {
             );
 
             return res.status(200).json(response);
-        } catch (error: any) {
-            console.error(error);
-            const message = error.message ? error.message : 'Internal Server Error';
-            logger.error(message);
-            return res.status(500).send(message);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
         }
     }
 
