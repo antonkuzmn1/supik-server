@@ -42,7 +42,7 @@ export class DbRouterGroupEditorService {
         }
     }
 
-    delete = async(req: Request, res: Response): Promise<Response> => {
+    delete = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.delete');
         try {
             return this.trueDelete(req, res);
@@ -55,8 +55,13 @@ export class DbRouterGroupEditorService {
 
     private create = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.create');
-        const response = await this.repository.create(req.body.routerId, req.body.groupId);
-        return res.status(200).json(response);
+        try {
+            const response = await this.repository.create(req.body.routerId, req.body.groupId);
+            return res.status(200).json(response);
+        } catch (error) {
+            console.error(error);
+            return res.status(500).send('Internal Server Error');
+        }
     }
 
     private trueDelete = async (req: Request, res: Response): Promise<Response> => {

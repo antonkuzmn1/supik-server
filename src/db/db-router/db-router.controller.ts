@@ -56,3 +56,10 @@ dbRouterController.delete(
     middleware.accountShouldBeEditor,
     service.delete,
 );
+
+dbRouterController.post(
+    '/test',
+    security.getAccountFromToken,
+    middleware.accountShouldBeViewer,
+    service.test,
+)
