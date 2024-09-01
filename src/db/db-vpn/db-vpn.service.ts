@@ -449,7 +449,7 @@ export class DbVpnService implements CrudInterface {
                 disabled: vpn.disabled === 'true' ? 1 : 0,
                 title: req.body.title,
                 routerId: routerId,
-                userId: req.body.userId > 0 ? req.body.userId : null,
+                userId: Number(req.body.userId),
             });
             console.log('Response Prisma:', response);
 

@@ -95,7 +95,7 @@ export class DbUserRepository {
 
     delete = async (id: number): Promise<any> => {
         logger.debug(className + '.delete');
-        return prisma.router.update({
+        return prisma.user.update({
             where: {
                 id,
             },
