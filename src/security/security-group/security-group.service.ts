@@ -90,18 +90,18 @@ export class SecurityGroupService {
                 title,
                 accessRouters,
                 accessUsers,
-                accountGroups,
             } = req.body;
 
             const response = await prisma.group.create({
                 data: {
                     name,
                     title,
-                    accessRouters,
-                    accessUsers,
-                    accountGroups,
+                    accessRouters: Number(accessRouters),
+                    accessUsers: Number(accessUsers),
                 },
             });
+
+            console.log(response);
 
             return res.status(200).json(response);
 
@@ -127,7 +127,6 @@ export class SecurityGroupService {
                 title,
                 accessRouters,
                 accessUsers,
-                accountGroups,
             } = req.body;
 
             const response = await prisma.group.update({
@@ -137,9 +136,8 @@ export class SecurityGroupService {
                 data: {
                     name,
                     title,
-                    accessRouters,
-                    accessUsers,
-                    accountGroups,
+                    accessRouters: Number(accessRouters),
+                    accessUsers: Number(accessUsers),
                 },
             });
 

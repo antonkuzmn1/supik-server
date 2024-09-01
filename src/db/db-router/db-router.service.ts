@@ -103,15 +103,58 @@ export class DbRouterService implements CrudInterface {
     private create = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.create');
         const { account, ...dataToCreate } = req.body;
-        const response = await this.repository.create(dataToCreate);
-        return res.status(200).json(response);
+        let fileBuffer = null;
+        if (dataToCreate.certificate) {
+            const base64Data = dataToCreate.certificate.replace(/^data:.*;base64,/, ''); // Удаление префикса
+            fileBuffer = Buffer.from(base64Data, 'base64');
+        }
+        try {
+            const response = await this.repository.create({
+                login: dataToCreate.login,
+                password: dataToCreate.password,
+                localAddress: dataToCreate.localAddress,
+                remoteAddress: dataToCreate.remoteAddress,
+                name: dataToCreate.name,
+                title: dataToCreate.title,
+                disabled: dataToCreate.disabled,
+                certificate: fileBuffer,
+                l2tpKey: dataToCreate.l2tpKey,
+            });
+            return res.status(200).json(response);
+        } catch (error) {
+            console.error(error);
+            logger.error('Internal Server Error');
+            return res.status(500).send('Internal Server Error');
+        }
     }
 
     private update = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.update');
         const { account, ...dataToCreate } = req.body;
-        const response = await this.repository.update(dataToCreate);
-        return res.status(200).json(response);
+        let fileBuffer = null;
+        if (dataToCreate.certificate) {
+            const base64Data = dataToCreate.certificate.replace(/^data:.*;base64,/, ''); // Удаление префикса
+            fileBuffer = Buffer.from(base64Data, 'base64');
+        }
+        try {
+            const response = await this.repository.update({
+                id: dataToCreate.id,
+                login: dataToCreate.login,
+                password: dataToCreate.password,
+                localAddress: dataToCreate.localAddress,
+                remoteAddress: dataToCreate.remoteAddress,
+                name: dataToCreate.name,
+                title: dataToCreate.title,
+                disabled: dataToCreate.disabled,
+                certificate: fileBuffer,
+                l2tpKey: dataToCreate.l2tpKey,
+            });
+            return res.status(200).json(response);
+        } catch (error) {
+            console.error(error);
+            logger.error('Internal Server Error');
+            return res.status(500).send('Internal Server Error');
+        }
     }
 
     private softDelete = async (req: Request, res: Response): Promise<Response> => {

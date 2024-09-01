@@ -117,6 +117,25 @@ export class DbRouterRepository {
         l2tpKey: string,
     }): Promise<RouterExtended> => {
         logger.debug(className + '.update');
+        if (data.certificate === null) {
+            const {certificate, ...withoutCertificate} = data;
+            return prisma.router.update({
+                where: {id: withoutCertificate.id},
+                data: withoutCertificate,
+                include: {
+                    routerGroupViewer: {
+                        include: {
+                            group: true,
+                        },
+                    },
+                    routerGroupEditor: {
+                        include: {
+                            group: true,
+                        },
+                    },
+                },
+            });
+        }
         return prisma.router.update({
             where: {id: data.id},
             data: data,
