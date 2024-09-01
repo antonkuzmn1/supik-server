@@ -91,7 +91,7 @@ export class DbVpnRepository {
             disabled: 0 | 1,
             title: string,
             routerId: number,
-            userId: number,
+            userId: number | null,
         }
     ): Promise<any> => {
         logger.debug(className + '.update');
