@@ -113,6 +113,21 @@ export class DbRouterService implements CrudInterface {
         }
     }
 
+    sync = async (req: Request, res: Response): Promise<Response> => {
+        logger.debug(className + '.sync');
+        try {
+            return this.syncVpns(req, res);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
+        }
+    }
+
     private findUnique = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.findUnique');
         try {
@@ -289,6 +304,193 @@ export class DbRouterService implements CrudInterface {
                 return res.status(400).send('Connection failed');
             }
             return res.status(200).json(true);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
+        }
+    }
+
+    private syncVpns = async (req: Request, res: Response): Promise<Response> => {
+        logger.debug(className + '.syncVpns');
+        try {
+            const routerId = req.body.routerId;
+            if (!routerId) {
+                logger.error('"routerId" field is required');
+                return res.status(400).send('"routerId" field is required');
+            }
+            logger.debug(`Received router ID: ${routerId}`);
+
+            const router = await prisma.router.findUnique({
+                where: {
+                    id: routerId,
+                },
+            });
+            if (!router) {
+                logger.error(`Router with ID ${routerId} not found`);
+                return res.status(403).send(`Router with ID ${routerId} not found`);
+            }
+            logger.debug(`Founded router: ${router.name} (${router.localAddress})`);
+            try {
+                const host = router.localAddress;
+                if (!host) {
+                    return res.status(400).send('"host" field is required');
+                }
+                logger.debug(`Received Host: ${host}`);
+                const user = router.login;
+                if (!user) {
+                    return res.status(400).send('"user" field is required');
+                }
+                logger.debug(`Received User: ${user}`);
+                const password = router.password;
+                if (!password) {
+                    return res.status(400).send('"password" field is required');
+                }
+                logger.debug(`Received Password: ${password}`);
+                const port = process.env.TEST_ROUTER_PORT as any as number;
+                logger.debug(`Received Port: ${port}`);
+                const timeout = process.env.TEST_ROUTER_TIMEOUT as any as number;
+                logger.debug(`Received Timeout: ${timeout}`);
+                try {
+                    const routerOSAPI = new RouterOSAPI({
+                        host,
+                        user,
+                        password,
+                        port,
+                        timeout,
+                    });
+                    const api = await routerOSAPI.connect();
+                    if (!api.connected) {
+                        return res.status(400).send('Connection failed');
+                    }
+                    logger.debug(`Successfully connected: ${host}`);
+                    try {
+                        const vpnsFromRouterOS = await api.write('/ppp/secret/print');
+                        logger.debug(`Founded ${vpnsFromRouterOS.length} rows of VPN accounts by Router ${host}`);
+                        for (const vpnFromRouterOS of vpnsFromRouterOS) {
+                            logger.debug('');
+                            logger.debug(`Check VPN with name: ${vpnFromRouterOS.name}`);
+                            try {
+                                logger.debug(`vpnId: ${vpnFromRouterOS['.id']}, routerId: ${routerId}`);
+                                const vpnFromDB = await prisma.vpn.findFirst({
+                                    where: {
+                                        vpnId: vpnFromRouterOS['.id'],
+                                        routerId: routerId,
+                                        deleted: 0,
+                                    },
+                                });
+                                if (!vpnFromDB) {
+                                    logger.debug(`VPN ${vpnFromRouterOS.name} (${vpnFromRouterOS['.id']}) is not exists`);
+                                    try {
+                                        const response = await prisma.vpn.create({
+                                            data: {
+                                                name: vpnFromRouterOS.name,
+                                                password: vpnFromRouterOS.password,
+                                                profile: vpnFromRouterOS.profile,
+                                                remoteAddress: vpnFromRouterOS['remote-address'],
+                                                service: vpnFromRouterOS.service,
+                                                disabled: vpnFromRouterOS.disabled === 'true' ? 1 : 0,
+                                                vpnId: vpnFromRouterOS['.id'],
+                                                routerId: routerId,
+                                                userId: req.body.userId > 0 ? req.body.userId : null,
+                                            }
+                                        });
+                                        await prisma.log.create({
+                                            data: {
+                                                action: 'create_vpn',
+                                                newValue: response,
+                                                initiatorId: req.body.account.id,
+                                                vpnId: response.id,
+                                            },
+                                        });
+                                    } catch (error: unknown) {
+                                        if (error instanceof Error) {
+                                            logger.error(error.message);
+                                            return res.status(500).send(error.message);
+                                        } else {
+                                            logger.error('Unexpected error');
+                                            return res.status(500).send('Unexpected error');
+                                        }
+                                    }
+                                } else {
+                                    logger.debug(`Founded ${vpnFromDB.name} (VPN ID: ${vpnFromDB.vpnId}) (ID: ${vpnFromDB.id})`);
+                                    try {
+                                        const response = await prisma.vpn.update({
+                                            where: {
+                                                id: vpnFromDB.id,
+                                            },
+                                            data: {
+                                                name: vpnFromRouterOS.name,
+                                                password: vpnFromRouterOS.password,
+                                                profile: vpnFromRouterOS.profile,
+                                                remoteAddress: vpnFromRouterOS['remote-address'],
+                                                service: vpnFromRouterOS.service,
+                                                disabled: vpnFromRouterOS.disabled === 'true' ? 1 : 0,
+                                                vpnId: vpnFromRouterOS['.id'],
+                                                routerId: routerId,
+                                                userId: req.body.userId > 0 ? req.body.userId : null,
+                                            }
+                                        });
+                                        await prisma.log.create({
+                                            data: {
+                                                action: 'sync_update_vpn',
+                                                newValue: response,
+                                                initiatorId: req.body.account.id,
+                                                vpnId: response.id,
+                                            },
+                                        });
+                                    } catch (error: unknown) {
+                                        if (error instanceof Error) {
+                                            logger.error(error.message);
+                                            return res.status(500).send(error.message);
+                                        } else {
+                                            logger.error('Unexpected error');
+                                            return res.status(500).send('Unexpected error');
+                                        }
+                                    }
+                                }
+                            } catch (error: unknown) {
+                                if (error instanceof Error) {
+                                    logger.error(error.message);
+                                    return res.status(500).send(error.message);
+                                } else {
+                                    logger.error('Unexpected error');
+                                    return res.status(500).send('Unexpected error');
+                                }
+                            }
+                        }
+                        return res.status(200).json(vpnsFromRouterOS);
+                    } catch (error: unknown) {
+                        if (error instanceof Error) {
+                            logger.error(error.message);
+                            return res.status(500).send(error.message);
+                        } else {
+                            logger.error('Unexpected error');
+                            return res.status(500).send('Unexpected error');
+                        }
+                    }
+                } catch (error: unknown) {
+                    if (error instanceof Error) {
+                        logger.error(error.message);
+                        return res.status(500).send(error.message);
+                    } else {
+                        logger.error('Unexpected error');
+                        return res.status(500).send('Unexpected error');
+                    }
+                }
+            } catch (error: unknown) {
+                if (error instanceof Error) {
+                    logger.error(error.message);
+                    return res.status(500).send(error.message);
+                } else {
+                    logger.error('Unexpected error');
+                    return res.status(500).send('Unexpected error');
+                }
+            }
         } catch (error: unknown) {
             if (error instanceof Error) {
                 logger.error(error.message);
