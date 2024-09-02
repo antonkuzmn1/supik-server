@@ -41,6 +41,10 @@ model Account {
   disabled Int    @default(0) @db.TinyInt()
 
   accountGroups AccountGroup[]
+
+  logsInitiated Log[] @relation("initiator")
+
+  logs Log[] @relation("account")
 }
 
 model Group {
@@ -58,6 +62,8 @@ model Group {
   accountGroups     AccountGroup[]
   routerGroupViewer RouterGroupViewer[]
   routerGroupEditor RouterGroupEditor[]
+
+  log Log[]
 }
 
 model AccountGroup {
@@ -90,6 +96,8 @@ model Router {
   vpns              Vpn[]
   routerGroupViewer RouterGroupViewer[]
   routerGroupEditor RouterGroupEditor[]
+
+  logs Log[]
 }
 
 model RouterGroupViewer {
@@ -132,6 +140,8 @@ model Vpn {
   router Router @relation(fields: [routerId], references: [id])
   user   User?  @relation(fields: [userId], references: [id])
 
+  logs Log[]
+
   @@id([id, routerId])
 }
 
@@ -152,4 +162,31 @@ model User {
   disabled   Int    @default(0) @db.TinyInt()
 
   vpns Vpn[]
+
+  logs Log[]
+}
+
+model Log {
+  id      Int      @id @default(autoincrement())
+  created DateTime @default(now()) @db.Timestamp(0)
+
+  action   String @db.VarChar(50)
+  newValue Json?
+
+  initiatorId Int
+
+  accountId   Int?
+  groupId     Int?
+  routerId    Int?
+  vpnId       String?
+  vpnRouterId Int?
+  userId      Int?
+
+  initiator Account @relation("initiator", fields: [initiatorId], references: [id])
+
+  account Account? @relation("account", fields: [accountId], references: [id])
+  group   Group?   @relation(fields: [groupId], references: [id])
+  router  Router?  @relation(fields: [routerId], references: [id])
+  vpn     Vpn?     @relation(fields: [vpnId, routerId], references: [id, routerId])
+  user    User?    @relation(fields: [userId], references: [id])
 }

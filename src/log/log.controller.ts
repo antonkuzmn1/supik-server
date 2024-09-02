@@ -16,18 +16,19 @@ limitations under the License.
 
 */
 
-import {Router} from 'express';
-import {securityController} from "./security/security.controller";
-import {dbController} from "./db/db.controller";
-import {routerOsController} from "./router-os/router-os.controller";
-import {logController} from "./log/log.controller";
+import {Router} from "express";
+import {LogService} from "./log.service";
+import {SecurityMiddleware} from "../security/security.middleware";
 
-// /api
-export const router = Router();
+const service = new LogService();
+const sec = new SecurityMiddleware();
 
-router.get('/', (_req, res) => res.status(200).json({status: 'server is working'}))
+// /api/log
+export const logController = Router();
 
-router.use('/security', securityController);
-router.use('/db', dbController);
-router.use('/router-os', routerOsController)
-router.use('/log', logController);
+logController.get(
+    '/',
+    sec.getAccountFromToken,
+    sec.accountShouldBeAdmin,
+    service.getAll,
+);
