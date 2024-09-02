@@ -19,6 +19,7 @@ limitations under the License.
 import {logger} from "../../logger";
 import {Request, Response} from "express";
 import {DbRouterGroupViewerRepository} from "./db-router-group-viewer.repository";
+import {prisma} from "../../prisma";
 
 const className = 'DbRouterGroupViewerService';
 
@@ -65,6 +66,15 @@ export class DbRouterGroupViewerService {
         logger.debug(className + '.create');
         try {
             const response = await this.repository.create(req.body.routerId, req.body.groupId);
+            await prisma.log.create({
+                data: {
+                    action: 'create_router_group_viewer',
+                    newValue: response,
+                    initiatorId: req.body.account.id,
+                    routerId: response.routerId,
+                    groupId: response.groupId,
+                },
+            });
             return res.status(200).json(response);
         } catch (error: unknown) {
             if (error instanceof Error) {
@@ -81,6 +91,15 @@ export class DbRouterGroupViewerService {
         logger.debug(className + '.trueDelete');
         try {
             const response = await this.repository.delete(req.body.routerId, req.body.groupId);
+            await prisma.log.create({
+                data: {
+                    action: 'delete_router_group_viewer',
+                    newValue: response,
+                    initiatorId: req.body.account.id,
+                    routerId: response.routerId,
+                    groupId: response.groupId,
+                },
+            });
             return res.status(200).json(response);
         } catch (error: unknown) {
             if (error instanceof Error) {

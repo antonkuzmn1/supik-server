@@ -52,7 +52,7 @@ export class SecurityAccountGroupService {
 
             await prisma.log.create({
                 data: {
-                    action: 'create',
+                    action: 'create_account_group',
                     newValue: response,
                     initiatorId: req.body.account.id,
                     accountId: response.accountId,
@@ -102,7 +102,7 @@ export class SecurityAccountGroupService {
 
             await prisma.log.create({
                 data: {
-                    action: 'delete',
+                    action: 'delete_account_group',
                     newValue: response,
                     initiatorId: req.body.account.id,
                     accountId: response.accountId,

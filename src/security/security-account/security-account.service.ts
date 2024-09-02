@@ -133,7 +133,7 @@ export class SecurityAccountService {
 
             await prisma.log.create({
                 data: {
-                    action: 'create',
+                    action: 'create_account',
                     newValue: response,
                     initiatorId: req.body.account.id,
                     accountId: response.id,
@@ -190,7 +190,7 @@ export class SecurityAccountService {
 
             await prisma.log.create({
                 data: {
-                    action: 'update',
+                    action: 'update_account',
                     newValue: response,
                     initiatorId: req.body.account.id,
                     accountId: response.id,
@@ -231,7 +231,7 @@ export class SecurityAccountService {
 
             await prisma.log.create({
                 data: {
-                    action: 'delete',
+                    action: 'delete_account',
                     newValue: response,
                     initiatorId: req.body.account.id,
                     accountId: response.id,

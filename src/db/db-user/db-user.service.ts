@@ -20,6 +20,7 @@ import {logger} from "../../logger";
 import {Request, Response} from "express";
 import {CrudInterface} from "../../common/crud.interface";
 import {DbUserRepository} from "./db-user.repository";
+import {prisma} from "../../prisma";
 
 const className = 'DbUserService';
 
@@ -141,6 +142,14 @@ export class DbUserService implements CrudInterface {
         try {
             const {account, ...dataToCreate} = req.body;
             const response = await this.repository.create(dataToCreate);
+            await prisma.log.create({
+                data: {
+                    action: 'create_user',
+                    newValue: response,
+                    initiatorId: req.body.account.id,
+                    userId: response.id,
+                },
+            });
             return res.status(200).json(response);
         } catch (error: unknown) {
             if (error instanceof Error) {
@@ -158,6 +167,14 @@ export class DbUserService implements CrudInterface {
         try {
             const {account, ...dataToCreate} = req.body;
             const response = await this.repository.update(dataToCreate);
+            await prisma.log.create({
+                data: {
+                    action: 'update_user',
+                    newValue: response,
+                    initiatorId: req.body.account.id,
+                    userId: response.id,
+                },
+            });
             return res.status(200).json(response);
         } catch (error: unknown) {
             if (error instanceof Error) {
@@ -174,6 +191,14 @@ export class DbUserService implements CrudInterface {
         logger.debug(className + '.softDelete');
         try {
             const response = await this.repository.delete(req.body.id);
+            await prisma.log.create({
+                data: {
+                    action: 'delete_user',
+                    newValue: response,
+                    initiatorId: req.body.account.id,
+                    userId: response.id,
+                },
+            });
             return res.status(200).json(response);
         } catch (error: unknown) {
             if (error instanceof Error) {

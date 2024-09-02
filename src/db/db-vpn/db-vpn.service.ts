@@ -353,7 +353,6 @@ export class DbVpnService implements CrudInterface {
             }
             logger.debug(`Founded router name: ${router.name}`);
 
-            console.log('Before Router OS Connect:', router);
             const routerOSAPI = new RouterOSAPI({
                 host: router.localAddress,
                 user: router.login,
@@ -369,7 +368,6 @@ export class DbVpnService implements CrudInterface {
                 logger.info('Successfully connected');
             }
 
-            console.log('Before Router OS Create:', req.body);
             const raw = await this.routerOsRepository.create(
                 api,
                 req.body.name,
@@ -387,7 +385,6 @@ export class DbVpnService implements CrudInterface {
                 logger.debug('VPN successfully created by Router OS')
             }
 
-            console.log('Before Prisma Create', vpn);
             const response = await this.repository.create({
                 id: vpn['.id'],
                 name: vpn.name,
@@ -400,8 +397,14 @@ export class DbVpnService implements CrudInterface {
                 routerId: routerId,
                 userId: req.body.userId > 0 ? req.body.userId : null,
             });
-            console.log('Response Prisma:', response);
-
+            await prisma.log.create({
+                data: {
+                    action: 'create_vpn',
+                    newValue: response,
+                    initiatorId: req.body.account.id,
+                    vpnId: response.id,
+                },
+            });
             return res.status(200).json(response);
         } catch (error: unknown) {
             if (error instanceof Error) {
@@ -443,7 +446,6 @@ export class DbVpnService implements CrudInterface {
             }
             logger.debug(`Founded router name: ${router.name}`);
 
-            console.log('Before Router OS Connect:', router);
             const routerOSAPI = new RouterOSAPI({
                 host: router.localAddress,
                 user: router.login,
@@ -457,7 +459,6 @@ export class DbVpnService implements CrudInterface {
             }
             logger.info(`Successfully connected to: ${router.localAddress}`);
 
-            console.log('Before Router OS Update:', req.body);
             await this.routerOsRepository.update(
                 api,
                 id,
@@ -476,8 +477,6 @@ export class DbVpnService implements CrudInterface {
                 logger.debug('VPN successfully updated by Router OS');
             }
 
-            console.log('Before Prisma Update (RouterOS)', vpn);
-            console.log('Before Prisma Update (Request):', req.body);
             const response = await this.repository.update({
                 id: vpn['.id'],
                 name: vpn.name,
@@ -490,8 +489,14 @@ export class DbVpnService implements CrudInterface {
                 routerId: routerId,
                 userId: Number(req.body.userId) > 0 ? Number(req.body.userId) : null,
             });
-            console.log('Response Prisma:', response);
-
+            await prisma.log.create({
+                data: {
+                    action: 'update_vpn',
+                    newValue: response,
+                    initiatorId: req.body.account.id,
+                    vpnId: response.id,
+                },
+            });
             return res.status(200).json(response);
         } catch (error: unknown) {
             if (error instanceof Error) {
@@ -561,7 +566,14 @@ export class DbVpnService implements CrudInterface {
                 id,
                 routerId,
             );
-
+            await prisma.log.create({
+                data: {
+                    action: 'delete_vpn',
+                    newValue: response,
+                    initiatorId: req.body.account.id,
+                    vpnId: response.id,
+                },
+            });
             return res.status(200).json(response);
         } catch (error: unknown) {
             if (error instanceof Error) {

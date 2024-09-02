@@ -21,6 +21,8 @@ import {Request, Response} from "express";
 import {CrudInterface} from "../../common/crud.interface";
 import {DbRouterRepository} from "./db-router.repository";
 import {RouterOSAPI} from "node-routeros";
+import {prisma} from "../../prisma";
+import {Router} from "@prisma/client";
 
 const className = 'DbRouterService';
 
@@ -172,6 +174,14 @@ export class DbRouterService implements CrudInterface {
                 certificate: fileBuffer,
                 l2tpKey: dataToCreate.l2tpKey,
             });
+            await prisma.log.create({
+                data: {
+                    action: 'create_router',
+                    newValue: response as Router,
+                    initiatorId: req.body.account.id,
+                    routerId: response.id,
+                },
+            });
             return res.status(200).json(response);
         } catch (error: unknown) {
             if (error instanceof Error) {
@@ -205,6 +215,14 @@ export class DbRouterService implements CrudInterface {
                 certificate: fileBuffer,
                 l2tpKey: dataToCreate.l2tpKey,
             });
+            await prisma.log.create({
+                data: {
+                    action: 'update_router',
+                    newValue: response as Router,
+                    initiatorId: req.body.account.id,
+                    routerId: response.id,
+                },
+            });
             return res.status(200).json(response);
         } catch (error: unknown) {
             if (error instanceof Error) {
@@ -221,6 +239,14 @@ export class DbRouterService implements CrudInterface {
         logger.debug(className + '.softDelete');
         try {
             const response = await this.repository.delete(req.body.id);
+            await prisma.log.create({
+                data: {
+                    action: 'delete_router',
+                    newValue: response as Router,
+                    initiatorId: req.body.account.id,
+                    routerId: response.id,
+                },
+            });
             return res.status(200).json(response);
         } catch (error: unknown) {
             if (error instanceof Error) {

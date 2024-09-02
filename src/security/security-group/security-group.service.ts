@@ -103,7 +103,7 @@ export class SecurityGroupService {
 
             await prisma.log.create({
                 data: {
-                    action: 'create',
+                    action: 'create_group',
                     newValue: response,
                     initiatorId: req.body.account.id,
                     groupId: response.id,
@@ -154,7 +154,7 @@ export class SecurityGroupService {
 
             await prisma.log.create({
                 data: {
-                    action: 'update',
+                    action: 'update_group',
                     newValue: response,
                     initiatorId: req.body.account.id,
                     groupId: response.id,
@@ -195,7 +195,7 @@ export class SecurityGroupService {
 
             await prisma.log.create({
                 data: {
-                    action: 'delete',
+                    action: 'delete_group',
                     newValue: response,
                     initiatorId: req.body.account.id,
                     groupId: response.id,
