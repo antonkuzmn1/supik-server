@@ -101,7 +101,14 @@ export class SecurityGroupService {
                 },
             });
 
-            console.log(response);
+            await prisma.log.create({
+                data: {
+                    action: 'create',
+                    newValue: response,
+                    initiatorId: req.body.account.id,
+                    groupId: response.id,
+                },
+            });
 
             return res.status(200).json(response);
 
@@ -145,6 +152,15 @@ export class SecurityGroupService {
                 },
             });
 
+            await prisma.log.create({
+                data: {
+                    action: 'update',
+                    newValue: response,
+                    initiatorId: req.body.account.id,
+                    groupId: response.id,
+                },
+            });
+
             return res.status(200).json(response);
 
         } catch (error: unknown) {
@@ -174,6 +190,15 @@ export class SecurityGroupService {
                 },
                 data: {
                     deleted: 1,
+                },
+            });
+
+            await prisma.log.create({
+                data: {
+                    action: 'delete',
+                    newValue: response,
+                    initiatorId: req.body.account.id,
+                    groupId: response.id,
                 },
             });
 
