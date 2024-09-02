@@ -418,7 +418,7 @@ export class DbVpnService implements CrudInterface {
                 logger.error('ID is undefined');
                 return res.status(403).send('ID is undefined');
             }
-            logger.debug(`VPN ID: ${routerId}`);
+            logger.debug(`VPN ID: ${vpnId}`);
 
             const router = await prisma.router.findUnique({
                 where: {
@@ -455,7 +455,7 @@ export class DbVpnService implements CrudInterface {
                 req.body.service,
                 req.body.disabled ? 'yes' : 'no',
             );
-            const vpn = (await this.routerOsRepository.findUnique(api, id))[0];
+            const vpn = (await this.routerOsRepository.findUnique(api, vpnId))[0];
             if (!vpn) {
                 logger.error('VPN not updated by Router OS');
                 return res.status(403).send('VPN not updated by Router OS');
