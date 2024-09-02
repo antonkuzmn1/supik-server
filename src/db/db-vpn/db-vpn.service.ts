@@ -37,24 +37,16 @@ export class DbVpnService implements CrudInterface {
     get = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.get');
         try {
-            if (req.query.id && req.query.routerId) {
+            if (req.query.id) {
                 if (!req.body.account.admin) {
-                    const vpnId = req.query.id as string;
-                    if (!vpnId) {
+                    const id = Number(req.query.id);
+                    if (!id) {
                         return res.status(400).send('Invalid VPN ID');
-                    }
-                    const routerId = Number(req.query.routerId);
-                    if (!routerId) {
-                        return res.status(400).send('Invalid Router ID');
                     }
                     const groupsIds = req.body.account.groupIds;
                     const vpn = await prisma.vpn.findUnique({
                         where: {
-                            id_routerId: {
-                                id: vpnId,
-                                routerId: routerId,
-                            },
-                            deleted: 0,
+                            id: id,
                         },
                         include: {
                             router: {
@@ -185,15 +177,14 @@ export class DbVpnService implements CrudInterface {
         try {
             if (!req.body.account.admin) {
                 const groupsIds = req.body.account.groupIds;
-                const vpnId = req.body.id;
-                const routerId = req.body.routerId;
-                const vpn = await this.repository.findUnique(vpnId, routerId);
+                const id = Number(req.body.id);
+                const vpn = await this.repository.findUnique(id);
                 if (!vpn) {
-                    return res.status(404).send(`VPN with ID ${vpnId} not found`);
+                    return res.status(404).send(`VPN with ID ${id} not found`);
                 }
                 const router = await prisma.router.findUnique({
                     where: {
-                        id: routerId,
+                        id: vpn.router.id,
                         deleted: 0,
                     },
                     include: {
@@ -202,7 +193,7 @@ export class DbVpnService implements CrudInterface {
                     },
                 });
                 if (!router) {
-                    return res.status(404).send(`Router with ID ${routerId} not found`);
+                    return res.status(404).send(`Router with ID ${vpn.router.id} not found`);
                 }
                 const routerGroupEditor = router.routerGroupEditor;
                 const accountIsEditor = groupsIds.some((groupId: number) => {
@@ -233,15 +224,14 @@ export class DbVpnService implements CrudInterface {
         try {
             if (!req.body.account.admin) {
                 const groupsIds = req.body.account.groupIds;
-                const vpnId = req.body.id;
-                const routerId = req.body.routerId;
-                const vpn = await this.repository.findUnique(vpnId, routerId);
+                const id = Number(req.body.id);
+                const vpn = await this.repository.findUnique(id);
                 if (!vpn) {
-                    return res.status(404).send(`VPN with ID ${vpnId} not found`);
+                    return res.status(404).send(`VPN with ID ${id} not found`);
                 }
                 const router = await prisma.router.findUnique({
                     where: {
-                        id: routerId,
+                        id: vpn.router.id,
                         deleted: 0,
                     },
                     include: {
@@ -250,7 +240,7 @@ export class DbVpnService implements CrudInterface {
                     },
                 });
                 if (!router) {
-                    return res.status(404).send(`Router with ID ${routerId} not found`);
+                    return res.status(404).send(`Router with ID ${vpn.router.id} not found`);
                 }
                 const routerGroupEditor = router.routerGroupEditor;
                 const accountIsEditor = groupsIds.some((groupId: number) => {
@@ -280,23 +270,13 @@ export class DbVpnService implements CrudInterface {
         logger.debug(className + '.findUnique');
         try {
 
-            const id = req.query.id;
+            const id = Number(req.query.id);
             if (!id) {
                 logger.error('ID is undefined');
                 return res.status(403).send('ID is undefined');
             }
-            if (typeof id !== 'string') {
-                logger.error(`ID is not a string`);
-                return res.status(403).send('ID is not a string');
-            }
 
-            const routerId = Number(req.query.routerId);
-            if (!routerId) {
-                logger.error('Router ID is undefined');
-                return res.status(403).send('Router ID is undefined');
-            }
-
-            const vpn = await this.repository.findUnique(id, routerId);
+            const vpn = await this.repository.findUnique(id);
             if (!vpn) {
                 logger.error(`Entity with ID ${id} not found`);
                 return res.status(403).send(`Entity with ID ${id} not found`);
@@ -333,7 +313,6 @@ export class DbVpnService implements CrudInterface {
     private create = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.create');
         try {
-
             const routerId = Number(req.body.routerId);
             if (!routerId) {
                 logger.error('Router ID is undefined');
@@ -386,7 +365,7 @@ export class DbVpnService implements CrudInterface {
             }
 
             const response = await this.repository.create({
-                id: vpn['.id'],
+                vpnId: vpn['.id'],
                 name: vpn.name,
                 password: vpn.password,
                 profile: vpn.profile,
@@ -420,6 +399,13 @@ export class DbVpnService implements CrudInterface {
     private update = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.update');
         try {
+            const id = req.body.id;
+            if (!id) {
+                logger.error('ID is undefined');
+                return res.status(403).send('ID is undefined');
+            }
+            logger.debug(`VPN ID: ${id}`);
+
             const routerId = Number(req.body.routerId);
             if (!routerId) {
                 logger.error('Router ID is undefined');
@@ -427,8 +413,8 @@ export class DbVpnService implements CrudInterface {
             }
             logger.debug(`Router ID: ${routerId}`);
 
-            const id = req.body.id;
-            if (!id) {
+            const vpnId = req.body.vpnId;
+            if (!vpnId) {
                 logger.error('ID is undefined');
                 return res.status(403).send('ID is undefined');
             }
@@ -461,7 +447,7 @@ export class DbVpnService implements CrudInterface {
 
             await this.routerOsRepository.update(
                 api,
-                id,
+                vpnId,
                 req.body.name,
                 req.body.password,
                 req.body.profile,
@@ -478,7 +464,7 @@ export class DbVpnService implements CrudInterface {
             }
 
             const response = await this.repository.update({
-                id: vpn['.id'],
+                id: id,
                 name: vpn.name,
                 password: vpn.password,
                 profile: vpn.profile,
@@ -486,6 +472,7 @@ export class DbVpnService implements CrudInterface {
                 service: vpn.service,
                 disabled: vpn.disabled === 'true' ? 1 : 0,
                 title: req.body.title,
+                vpnId: vpn['.id'],
                 routerId: routerId,
                 userId: Number(req.body.userId) > 0 ? Number(req.body.userId) : null,
             });
@@ -512,6 +499,12 @@ export class DbVpnService implements CrudInterface {
     private softDelete = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.softDelete');
         try {
+            const id = req.body.id;
+            if (!id) {
+                logger.error('ID is undefined');
+                return res.status(403).send('ID is undefined');
+            }
+            logger.debug(`VPN ID: ${id}`);
 
             const routerId = Number(req.body.routerId);
             if (!routerId) {
@@ -520,12 +513,12 @@ export class DbVpnService implements CrudInterface {
             }
             logger.debug(`Router ID: ${routerId}`);
 
-            const id = req.body.id;
-            if (!id) {
+            const vpnId = req.body.vpnId;
+            if (!vpnId) {
                 logger.error('ID is undefined');
                 return res.status(403).send('ID is undefined');
             }
-            logger.debug(`VPN ID: ${routerId}`);
+            logger.debug(`VPN ID: ${vpnId}`);
 
             const router = await prisma.router.findUnique({
                 where: {
@@ -537,10 +530,7 @@ export class DbVpnService implements CrudInterface {
                 return res.status(400).send('Router not found');
             }
             if (router.deleted === 1) {
-                const response = await this.repository.delete(
-                    id,
-                    routerId,
-                );
+                const response = await this.repository.delete(id);
 
                 return res.status(200).json(response);
             }
@@ -557,15 +547,9 @@ export class DbVpnService implements CrudInterface {
                 return res.status(400).send('Connection failed');
             }
 
-            await this.routerOsRepository.delete(
-                api,
-                id,
-            );
+            await this.routerOsRepository.delete(api, vpnId);
 
-            const response = await this.repository.delete(
-                id,
-                routerId,
-            );
+            const response = await this.repository.delete(id);
             await prisma.log.create({
                 data: {
                     action: 'delete_vpn',
@@ -585,6 +569,5 @@ export class DbVpnService implements CrudInterface {
             }
         }
     }
-
 
 }

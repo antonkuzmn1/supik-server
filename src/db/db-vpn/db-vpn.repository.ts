@@ -26,15 +26,11 @@ export class DbVpnRepository {
         logger.debug(className);
     }
 
-    findUnique = async (id: string, routerId: number): Promise<any> => {
+    findUnique = async (id: number): Promise<any> => {
         logger.debug(className + '.findUnique');
         return prisma.vpn.findUnique({
             where: {
-                id_routerId: {
-                    id,
-                    routerId,
-                },
-                deleted: 0,
+                id,
             },
             include: {
                 router: true,
@@ -58,7 +54,6 @@ export class DbVpnRepository {
 
     create = async (
         data: {
-            id: string,
             name: string,
             password: string,
             profile: string,
@@ -66,6 +61,7 @@ export class DbVpnRepository {
             service: string,
             disabled: 0 | 1,
             title: string,
+            vpnId: string,
             routerId: number,
             userId: number,
         }
@@ -82,7 +78,7 @@ export class DbVpnRepository {
 
     update = async (
         data: {
-            id: string,
+            id: number,
             name: string,
             password: string,
             profile: string,
@@ -90,6 +86,7 @@ export class DbVpnRepository {
             service: string,
             disabled: 0 | 1,
             title: string,
+            vpnId: string,
             routerId: number,
             userId: number | null,
         }
@@ -97,10 +94,7 @@ export class DbVpnRepository {
         logger.debug(className + '.update');
         return prisma.vpn.update({
             where: {
-                id_routerId: {
-                    id: data.id,
-                    routerId: data.routerId,
-                },
+                id: data.id,
             },
             data: data,
             include: {
@@ -110,14 +104,11 @@ export class DbVpnRepository {
         });
     }
 
-    delete = async (id: string, routerId: number): Promise<any> => {
+    delete = async (id: number): Promise<any> => {
         logger.debug(className + '.delete');
         return prisma.vpn.update({
             where: {
-                id_routerId: {
-                    id,
-                    routerId,
-                },
+                id
             },
             data: {
                 deleted: 1,
