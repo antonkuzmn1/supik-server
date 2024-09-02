@@ -401,7 +401,7 @@ export class DbRouterService implements CrudInterface {
                                         });
                                         await prisma.log.create({
                                             data: {
-                                                action: 'create_vpn',
+                                                action: 'sync_create_vpn',
                                                 newValue: response,
                                                 initiatorId: req.body.account.id,
                                                 vpnId: response.id,
