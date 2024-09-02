@@ -50,6 +50,16 @@ export class SecurityAccountGroupService {
                 },
             });
 
+            await prisma.log.create({
+                data: {
+                    action: 'create',
+                    newValue: response,
+                    initiatorId: req.body.account.id,
+                    accountId: response.accountId,
+                    groupId: response.groupId,
+                },
+            });
+
             return res.status(200).json(response);
 
         } catch (error: unknown) {
@@ -87,6 +97,16 @@ export class SecurityAccountGroupService {
                         accountId,
                         groupId,
                     },
+                },
+            });
+
+            await prisma.log.create({
+                data: {
+                    action: 'delete',
+                    newValue: response,
+                    initiatorId: req.body.account.id,
+                    accountId: response.accountId,
+                    groupId: response.groupId,
                 },
             });
 
