@@ -131,6 +131,15 @@ export class SecurityAccountService {
                 },
             });
 
+            await prisma.log.create({
+                data: {
+                    action: 'create',
+                    newValue: response,
+                    initiatorId: req.body.account.id,
+                    accountId: response.id,
+                },
+            });
+
             return res.status(200).json(response);
 
         } catch (error: unknown) {
@@ -179,6 +188,15 @@ export class SecurityAccountService {
                 },
             });
 
+            await prisma.log.create({
+                data: {
+                    action: 'update',
+                    newValue: response,
+                    initiatorId: req.body.account.id,
+                    accountId: response.id,
+                },
+            });
+
             return res.status(200).json(response);
 
         } catch (error: unknown) {
@@ -208,6 +226,15 @@ export class SecurityAccountService {
                 },
                 data: {
                     deleted: 1,
+                },
+            });
+
+            await prisma.log.create({
+                data: {
+                    action: 'delete',
+                    newValue: response,
+                    initiatorId: req.body.account.id,
+                    accountId: response.id,
                 },
             });
 
