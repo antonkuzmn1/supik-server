@@ -177,6 +177,14 @@ export class DbRouterService implements CrudInterface {
             const base64Data = dataToCreate.certificate.replace(/^data:.*;base64,/, ''); // Удаление префикса
             fileBuffer = Buffer.from(base64Data, 'base64');
         }
+        if (!dataToCreate.disabled && dataToCreate.remoteAddress.length < 7) {
+            if (dataToCreate.remoteAddress.length === 0) {
+                logger.error('External address required');
+                return res.status(400).send('External address required');
+            }
+            logger.error('External address should be at least 7 characters long');
+            return res.status(400).send('External address should be at least 7 characters long');
+        }
         try {
             const response = await this.repository.create({
                 login: dataToCreate.login,
@@ -216,6 +224,14 @@ export class DbRouterService implements CrudInterface {
         if (dataToCreate.certificate) {
             const base64Data = dataToCreate.certificate.replace(/^data:.*;base64,/, ''); // Удаление префикса
             fileBuffer = Buffer.from(base64Data, 'base64');
+        }
+        if (!dataToCreate.disabled && dataToCreate.remoteAddress.length < 7) {
+            if (dataToCreate.remoteAddress.length === 0) {
+                logger.error('External address required');
+                return res.status(400).send('External address required');
+            }
+            logger.error('External address should be at least 7 characters long');
+            return res.status(400).send('External address should be at least 7 characters long');
         }
         try {
             const response = await this.repository.update({
