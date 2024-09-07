@@ -172,32 +172,26 @@ export class SecurityAccountService {
                 disabled,
             } = req.body;
 
-            const passwordEncrypted = await bcrypt.hash(password, 10);
-
-            const data = password.length > 0 ? () => {
-                return {
-                    username,
-                    password: passwordEncrypted,
-                    fullname,
-                    title,
-                    admin,
-                    disabled,
-                }
-            } : () => {
-                return {
-                    username,
-                    fullname,
-                    title,
-                    admin,
-                    disabled,
-                }
+            const data = password.length > 0 ? {
+                username,
+                password: await bcrypt.hash(password, 10),
+                fullname,
+                title,
+                admin,
+                disabled,
+            } : {
+                username,
+                fullname,
+                title,
+                admin,
+                disabled,
             }
 
             const response = await prisma.account.update({
                 where: {
                     id,
                 },
-                data: data(),
+                data,
             });
 
             await prisma.log.create({
