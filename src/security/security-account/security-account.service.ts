@@ -64,10 +64,91 @@ export class SecurityAccountService {
 
             } else {
 
+                let where: any = {
+                    deleted: 0,
+                }
+
+                const createdGte = req.query.createdGte;
+                const createdLte = req.query.createdLte;
+                if (createdGte && createdLte) {
+                    where = {
+                        ...where,
+                        created: {
+                            gte: new Date(createdGte as string),
+                            lte: new Date(createdLte as string),
+                        },
+                    }
+                }
+
+                const updatedGte = req.query.updatedGte;
+                if (updatedGte) {
+                    where = {
+                        ...where,
+                        updated: {
+                            gte: new Date(updatedGte as string),
+                        },
+                    }
+                }
+
+                const updatedLte = req.query.updatedLte;
+                if (updatedLte) {
+                    where = {
+                        ...where,
+                        updated: {
+                            lte: new Date(updatedLte as string),
+                        },
+                    }
+                }
+
+                const username = req.query.username;
+                if (username) {
+                    where = {
+                        ...where,
+                        username: {
+                            contains: username,
+                        },
+                    }
+                }
+
+                const fullname = req.query.fullname;
+                if (fullname) {
+                    where = {
+                        ...where,
+                        fullname: {
+                            contains: fullname,
+                        },
+                    }
+                }
+
+                const title = req.query.title;
+                if (title) {
+                    where = {
+                        ...where,
+                        title: {
+                            contains: title,
+                        },
+                    }
+                }
+
+                const admin = req.query.admin;
+                if (admin !== undefined) {
+                    where = {
+                        ...where,
+                        admin: admin === 'true' ? 1 : 0,
+                    }
+                }
+
+                const disabled = req.query.disabled;
+                if (disabled !== undefined) {
+                    where = {
+                        ...where,
+                        disabled: disabled === 'true' ? 1 : 0,
+                    }
+                }
+
+                console.log('where:', where);
                 const response = await prisma.account.findMany({
-                    where: {
-                        deleted: 0,
-                    },
+                    where,
                     include: {
                         accountGroups: {
                             include: {
