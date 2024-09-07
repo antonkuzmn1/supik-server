@@ -44,6 +44,9 @@ export class DbVpnRepository {
         return prisma.vpn.findMany({
             where: {
                 deleted: 0,
+                router: {
+                    disabled: 0,
+                }
             },
             include: {
                 router: true,
