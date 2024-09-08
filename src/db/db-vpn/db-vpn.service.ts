@@ -433,7 +433,6 @@ export class DbVpnService implements CrudInterface {
                 }
             }
 
-            console.log('Filter:', where)
             const response = await this.repository.findMany(where);
             return res.status(200).json(response);
         } catch (error: unknown) {

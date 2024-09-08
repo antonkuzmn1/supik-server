@@ -39,12 +39,10 @@ export class DbUserRepository {
         });
     }
 
-    findMany = async (): Promise<any> => {
+    findMany = async (where: any): Promise<any> => {
         logger.debug(className + '.findMany');
         return prisma.user.findMany({
-            where: {
-                deleted: 0,
-            },
+            where,
             include: {
                 vpns: true,
             },
