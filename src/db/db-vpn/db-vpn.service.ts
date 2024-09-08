@@ -294,10 +294,147 @@ export class DbVpnService implements CrudInterface {
         }
     }
 
-    private findMany = async (_req: Request, res: Response): Promise<Response> => {
+    private findMany = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.findMany');
         try {
-            const response = await this.repository.findMany();
+            let where: any = {
+                deleted: 0,
+                router: {
+                    disabled: 0,
+                }
+            }
+
+            const createdGte = req.query.createdGte;
+            if (createdGte) {
+                where = {
+                    ...where,
+                    updated: {
+                        gte: new Date(createdGte as string),
+                    },
+                }
+            }
+
+            const createdLte = req.query.createdLte;
+            if (createdLte) {
+                where = {
+                    ...where,
+                    updated: {
+                        lte: new Date(createdLte as string),
+                    },
+                }
+            }
+
+            const updatedGte = req.query.updatedGte;
+            if (updatedGte) {
+                where = {
+                    ...where,
+                    updated: {
+                        gte: new Date(updatedGte as string),
+                    },
+                }
+            }
+
+            const updatedLte = req.query.updatedLte;
+            if (updatedLte) {
+                where = {
+                    ...where,
+                    updated: {
+                        lte: new Date(updatedLte as string),
+                    },
+                }
+            }
+
+            const name = req.query.name;
+            if (name) {
+                where = {
+                    ...where,
+                    name: {
+                        contains: name,
+                    },
+                }
+            }
+
+            const password = req.query.password;
+            if (password) {
+                where = {
+                    ...where,
+                    password: {
+                        contains: password,
+                    },
+                }
+            }
+
+            const profile = req.query.profile;
+            if (profile) {
+                where = {
+                    ...where,
+                    profile: {
+                        contains: profile,
+                    },
+                }
+            }
+
+            const service = req.query.service;
+            if (service) {
+                where = {
+                    ...where,
+                    service: {
+                        contains: service,
+                    },
+                }
+            }
+
+
+            const remoteAddress = req.query.remoteAddress;
+            if (remoteAddress) {
+                where = {
+                    ...where,
+                    remoteAddress: {
+                        contains: remoteAddress,
+                    },
+                }
+            }
+
+            const title = req.query.title;
+            if (title) {
+                where = {
+                    ...where,
+                    title: {
+                        contains: title,
+                    },
+                }
+            }
+
+            const disabled = req.query.disabled;
+            if (disabled !== undefined) {
+                where = {
+                    ...where,
+                    disabled: disabled === 'true' ? 1 : 0,
+                }
+            }
+
+            const routerId = req.query.routerId as string
+            if (routerId) {
+                where = {
+                    ...where,
+                    routerId: {
+                        in: routerId.split(',').map(Number),
+                    },
+                }
+            }
+
+            const userId = req.query.userId as string
+            if (userId) {
+                where = {
+                    ...where,
+                    userId: {
+                        in: userId.split(',').map(Number),
+                    },
+                }
+            }
+
+            console.log('Filter:', where)
+            const response = await this.repository.findMany(where);
             return res.status(200).json(response);
         } catch (error: unknown) {
             if (error instanceof Error) {

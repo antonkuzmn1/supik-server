@@ -39,15 +39,10 @@ export class DbVpnRepository {
         });
     }
 
-    findMany = async (): Promise<any> => {
+    findMany = async (where: any): Promise<any> => {
         logger.debug(className + '.findMany');
         return prisma.vpn.findMany({
-            where: {
-                deleted: 0,
-                router: {
-                    disabled: 0,
-                }
-            },
+            where,
             include: {
                 router: true,
                 user: true,
