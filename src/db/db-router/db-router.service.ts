@@ -153,10 +153,134 @@ export class DbRouterService implements CrudInterface {
         }
     }
 
-    private findMany = async (_req: Request, res: Response): Promise<Response> => {
+    private findMany = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.findMany');
         try {
-            const response = await this.repository.findMany();
+            let where: any = {
+                deleted: 0,
+            }
+
+            const createdGte = req.query.createdGte;
+            if (createdGte) {
+                where = {
+                    ...where,
+                    updated: {
+                        gte: new Date(createdGte as string),
+                    },
+                }
+            }
+
+            const createdLte = req.query.createdLte;
+            if (createdLte) {
+                where = {
+                    ...where,
+                    updated: {
+                        lte: new Date(createdLte as string),
+                    },
+                }
+            }
+
+            const updatedGte = req.query.updatedGte;
+            if (updatedGte) {
+                where = {
+                    ...where,
+                    updated: {
+                        gte: new Date(updatedGte as string),
+                    },
+                }
+            }
+
+            const updatedLte = req.query.updatedLte;
+            if (updatedLte) {
+                where = {
+                    ...where,
+                    updated: {
+                        lte: new Date(updatedLte as string),
+                    },
+                }
+            }
+
+            const login = req.query.login;
+            if (login) {
+                where = {
+                    ...where,
+                    login: {
+                        contains: login,
+                    },
+                }
+            }
+
+            const password = req.query.password;
+            if (password) {
+                where = {
+                    ...where,
+                    password: {
+                        contains: password,
+                    },
+                }
+            }
+
+            const localAddress = req.query.localAddress;
+            if (localAddress) {
+                where = {
+                    ...where,
+                    localAddress: {
+                        contains: localAddress,
+                    },
+                }
+            }
+
+            const remoteAddress = req.query.remoteAddress;
+            if (remoteAddress) {
+                where = {
+                    ...where,
+                    remoteAddress: {
+                        contains: remoteAddress,
+                    },
+                }
+            }
+
+            const name = req.query.name;
+            if (name) {
+                where = {
+                    ...where,
+                    name: {
+                        contains: name,
+                    },
+                }
+            }
+
+            const title = req.query.title;
+            if (title) {
+                where = {
+                    ...where,
+                    title: {
+                        contains: title,
+                    },
+                }
+            }
+
+            const disabled = req.query.disabled;
+            if (disabled !== undefined) {
+                where = {
+                    ...where,
+                    disabled: disabled === 'true' ? 1 : 0,
+                }
+            }
+
+            const l2tpKey = req.query.l2tpKey;
+            if (l2tpKey) {
+                where = {
+                    ...where,
+                    l2tpKey: {
+                        contains: l2tpKey,
+                    },
+                }
+            }
+
+            console.log('Filter:', where)
+
+            const response = await this.repository.findMany(where);
             return res.status(200).json(response);
         } catch (error: unknown) {
             if (error instanceof Error) {

@@ -54,12 +54,10 @@ export class DbRouterRepository {
         });
     }
 
-    findMany = async (): Promise<RouterExtended[]> => {
+    findMany = async (where: any): Promise<RouterExtended[]> => {
         logger.debug(className + '.findMany');
         return prisma.router.findMany({
-            where: {
-                deleted: 0,
-            },
+            where,
             include: {
                 routerGroupViewer: {
                     include: {

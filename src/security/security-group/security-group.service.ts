@@ -58,10 +58,88 @@ export class SecurityGroupService {
 
             } else {
 
+                let where: any = {
+                    deleted: 0,
+                }
+
+                const createdGte = req.query.createdGte;
+                if (createdGte) {
+                    where = {
+                        ...where,
+                        updated: {
+                            gte: new Date(createdGte as string),
+                        },
+                    }
+                }
+
+                const createdLte = req.query.createdLte;
+                if (createdLte) {
+                    where = {
+                        ...where,
+                        updated: {
+                            lte: new Date(createdLte as string),
+                        },
+                    }
+                }
+
+                const updatedGte = req.query.updatedGte;
+                if (updatedGte) {
+                    where = {
+                        ...where,
+                        updated: {
+                            gte: new Date(updatedGte as string),
+                        },
+                    }
+                }
+
+                const updatedLte = req.query.updatedLte;
+                if (updatedLte) {
+                    where = {
+                        ...where,
+                        updated: {
+                            lte: new Date(updatedLte as string),
+                        },
+                    }
+                }
+
+                const name = req.query.name;
+                if (name) {
+                    where = {
+                        ...where,
+                        name: {
+                            contains: name,
+                        },
+                    }
+                }
+
+                const title = req.query.title;
+                if (title) {
+                    where = {
+                        ...where,
+                        title: {
+                            contains: title,
+                        },
+                    }
+                }
+
+                const accessRouters = req.query.accessRouters;
+                if (accessRouters !== undefined) {
+                    where = {
+                        ...where,
+                        accessRouters: accessRouters === 'editor' ? 2 : accessRouters === 'viewer' ? 1 : 0,
+                    }
+                }
+
+                const accessUsers = req.query.accessUsers;
+                if (accessUsers !== undefined) {
+                    where = {
+                        ...where,
+                        accessRouters:  accessUsers === 'editor' ? 2 : accessUsers === 'viewer' ? 1 : 0,
+                    }
+                }
+
                 const response = await prisma.group.findMany({
-                    where: {
-                        deleted: 0,
-                    },
+                    where,
                     include: {
                         accountGroups: {
                             include: {

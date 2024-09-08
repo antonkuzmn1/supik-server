@@ -69,12 +69,20 @@ export class SecurityAccountService {
                 }
 
                 const createdGte = req.query.createdGte;
-                const createdLte = req.query.createdLte;
-                if (createdGte && createdLte) {
+                if (createdGte) {
                     where = {
                         ...where,
-                        created: {
+                        updated: {
                             gte: new Date(createdGte as string),
+                        },
+                    }
+                }
+
+                const createdLte = req.query.createdLte;
+                if (createdLte) {
+                    where = {
+                        ...where,
+                        updated: {
                             lte: new Date(createdLte as string),
                         },
                     }
@@ -146,7 +154,6 @@ export class SecurityAccountService {
                     }
                 }
 
-                console.log('where:', where);
                 const response = await prisma.account.findMany({
                     where,
                     include: {
