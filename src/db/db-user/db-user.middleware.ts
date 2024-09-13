@@ -46,14 +46,17 @@ export class DbUserMiddleware {
             const accountGroups: AccountGroup[] = (req.body.account as any).accountGroups as AccountGroup[];
 
             if (accountGroups.length === 0) {
-                return res.status(403).send('User is not editor');
+                return res.status(403).send('Access Denied');
             }
 
-            accountGroups.some(accountGroup => {
+            const some = accountGroups.some(accountGroup => {
                 const group = (accountGroup as any).group as Group;
-                const levelNumber = level === 'viewer' ? 1 : 0;
+                const levelNumber = level === 'viewer' ? 1 : 2;
                 return group.accessUsers >= levelNumber;
             });
+            if (!some) {
+                return res.status(403).send('Access Denied');
+            }
 
             return next();
         } catch (error: unknown) {

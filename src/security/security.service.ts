@@ -70,6 +70,10 @@ export class SecurityService {
                 logger.error('Account not found');
                 return res.status(403).send('Account not found');
             }
+            if (account.disabled) {
+                logger.error('Account is disabled');
+                return res.status(403).send('Account is disabled');
+            }
 
             const passwordIsValid = await bcrypt.compare(password, account.password);
             if (!passwordIsValid) {

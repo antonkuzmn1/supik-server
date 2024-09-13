@@ -111,6 +111,10 @@ export class DbVpnService implements CrudInterface {
                                     },
                                 ],
                             }
+                        },
+                        include: {
+                            router: true,
+                            user: true,
                         }
                     });
                     return res.status(200).json(vpns);

@@ -37,7 +37,7 @@ export class DbRouterMiddleware {
     }
 
     private checkForAccessRouters = (req: Request, res: Response, next: NextFunction, level: 'viewer' | 'editor'): any => {
-        logger.debug(className + '.accountIsViewer');
+        logger.debug(className + '.checkForAccessRouters');
         try {
             if (req.body.account.admin === 1) {
                 return next();
@@ -46,14 +46,19 @@ export class DbRouterMiddleware {
             const accountGroups: AccountGroup[] = (req.body.account as any).accountGroups as AccountGroup[];
 
             if (accountGroups.length === 0) {
-                return res.status(403).send('User is not editor');
+                return res.status(403).send('Access Denied');
             }
 
-            accountGroups.some(accountGroup => {
+            const some = accountGroups.some(accountGroup => {
                 const group = (accountGroup as any).group as Group;
-                const levelNumber = level === 'viewer' ? 1 : 0;
+                const levelNumber = level === 'viewer' ? 1 : 2;
                 return group.accessRouters >= levelNumber;
             });
+            if (!some) {
+                return res.status(403).send('Access Denied');
+            }
+
+            console.log('some', some);
 
             return next();
         } catch (error: unknown) {
