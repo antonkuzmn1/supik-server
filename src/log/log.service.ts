@@ -39,11 +39,34 @@ export class LogService {
         logger.debug(className);
     }
 
-    async getAll(_req: Request, res: Response): Promise<Response> {
+    async getAll(req: Request, res: Response): Promise<Response> {
         logger.debug(className + '.get');
         try {
 
+            let where: any = {}
+
+            const createdGte = req.query.createdGte;
+            if (createdGte) {
+                where = {
+                    ...where,
+                    created: {
+                        gte: new Date(createdGte as string),
+                    },
+                }
+            }
+
+            const createdLte = req.query.createdLte;
+            if (createdLte) {
+                where = {
+                    ...where,
+                    created: {
+                        lte: new Date(createdLte as string),
+                    },
+                }
+            }
+
             const logs = await prisma.log.findMany({
+                where,
                 include: {
                     initiator: true,
                     account: true,
@@ -51,7 +74,11 @@ export class LogService {
                     router: true,
                     vpn: true,
                     user: true,
-                }
+                },
+                orderBy: {
+                    id: 'desc',
+                },
+                // take: 100,
             });
 
             return res.status(200).json(logs);
