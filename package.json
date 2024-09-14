@@ -7,7 +7,8 @@
     "test": "jest",
     "build": "tsc",
     "start": "ts-node src/index.ts",
-    "migrate": "npx prisma migrate dev --name init"
+    "migrate": "npx prisma migrate dev --name init",
+    "deploy": "scp -r dist/* anton@192.168.250.103:/var/www/server/ && scp -r package.json anton@192.168.250.103:/var/www/server/ && scp -r swagger.yaml anton@192.168.250.103:/var/www/server/ && ssh anton@192.168.250.103 'source ~/.bashrc && ~/.nvm/versions/node/v22.8.0/bin/pm2 restart supik-server'"
   },
   "repository": {
     "type": "git",
