@@ -23,6 +23,7 @@ import {DbRouterRepository} from "./db-router.repository";
 import {RouterOSAPI} from "node-routeros";
 import {prisma} from "../../prisma";
 import {Router} from "@prisma/client";
+import {RouterOsRepository} from "../../router-os/router-os.repository";
 
 const className = 'DbRouterService';
 
@@ -30,6 +31,7 @@ export class DbRouterService implements CrudInterface {
 
     constructor(
         private readonly repository: DbRouterRepository,
+        private readonly routerOsRepository: RouterOsRepository,
     ) {
         logger.debug(className);
     }
@@ -136,12 +138,27 @@ export class DbRouterService implements CrudInterface {
                 logger.error('ID is undefined');
                 return res.status(403).send('ID is undefined');
             }
-            const response = await this.repository.findUnique(id);
-            if (!response) {
+            const router = await this.repository.findUnique(id);
+            if (!router) {
                 logger.error(`Entity with ID ${id} not found`);
                 return res.status(403).send(`Entity with ID ${id} not found`);
             }
-            return res.status(200).json(response);
+            const routerOSAPI = new RouterOSAPI({
+                host: router.localAddress,
+                user: router.login,
+                password: router.password,
+                port: Number(process.env.TEST_ROUTER_PORT),
+                timeout: Number(process.env.TEST_ROUTER_TIMEOUT),
+            });
+            try {
+                const api = await routerOSAPI.connect();
+                logger.info('Successfully connected');
+                const profiles = await this.routerOsRepository.findProfiles(api);
+                return res.status(200).json({router, profiles});
+            } catch (error) {
+                logger.error('Connection failed');
+                return res.status(200).json({router});
+            }
         } catch (error: unknown) {
             if (error instanceof Error) {
                 logger.error(error.message);

@@ -98,4 +98,12 @@ export class RouterOsRepository {
         return api.write('/ppp/secret/remove', [`=.id=${id}`]);
     }
 
+    findProfiles = async (
+        api: RouterOSAPI
+    ): Promise<IRosGenericResponse> => {
+        logger.debug(className + '.findProfiles');
+
+        return api.write('/ppp/profile/print');
+    }
+
 }

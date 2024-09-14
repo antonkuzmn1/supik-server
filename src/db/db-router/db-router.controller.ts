@@ -21,10 +21,14 @@ import {DbRouterService} from "./db-router.service";
 import {SecurityMiddleware} from "../../security/security.middleware";
 import {DbRouterRepository} from "./db-router.repository";
 import {DbRouterMiddleware} from "./db-router.middleware";
+import {RouterOsRepository} from "../../router-os/router-os.repository";
 
 const security = new SecurityMiddleware();
 const middleware = new DbRouterMiddleware();
-const service = new DbRouterService(new DbRouterRepository());
+const service = new DbRouterService(
+    new DbRouterRepository(),
+    new RouterOsRepository(),
+);
 
 // /api/db/router
 export const dbRouterController = Router()
