@@ -164,7 +164,7 @@ export class DbRouterService implements CrudInterface {
             if (createdGte) {
                 where = {
                     ...where,
-                    updated: {
+                    created: {
                         gte: new Date(createdGte as string),
                     },
                 }
@@ -174,7 +174,7 @@ export class DbRouterService implements CrudInterface {
             if (createdLte) {
                 where = {
                     ...where,
-                    updated: {
+                    created: {
                         lte: new Date(createdLte as string),
                     },
                 }

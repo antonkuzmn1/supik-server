@@ -66,7 +66,7 @@ export class SecurityGroupService {
                 if (createdGte) {
                     where = {
                         ...where,
-                        updated: {
+                        created: {
                             gte: new Date(createdGte as string),
                         },
                     }
@@ -76,7 +76,7 @@ export class SecurityGroupService {
                 if (createdLte) {
                     where = {
                         ...where,
-                        updated: {
+                        created: {
                             lte: new Date(createdLte as string),
                         },
                     }
