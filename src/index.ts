@@ -32,7 +32,7 @@ app.use(express.json());
 app.use(cors());
 app.use('/api', router);
 
-const version = '1.0.0';
+const version = '1.0.1';
 
 const PORT: string | 3000 = process.env.PORT || 3000;
 
