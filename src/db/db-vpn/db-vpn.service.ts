@@ -589,7 +589,7 @@ export class DbVpnService implements CrudInterface {
             const vpnsWithDuplicateAddr = vpnsForCheck.filter((vpn: any) => {
                 return vpn['remote-address'] === req.body.remoteAddress
             });
-            if (vpnsWithDuplicateAddr.length > 0) {
+            if (vpnsWithDuplicateAddr.length > 1 || vpnsWithDuplicateAddr[0]['.id'] !== req.body.vpnId) {
                 logger.error('Duplicate remote address');
                 return res.status(400).send('Duplicate remote address');
             }
