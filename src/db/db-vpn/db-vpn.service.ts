@@ -585,6 +585,15 @@ export class DbVpnService implements CrudInterface {
             }
             logger.info(`Successfully connected to: ${router.localAddress}`);
 
+            const vpnsForCheck = await this.routerOsRepository.findMany(api);
+            const vpnsWithDuplicateAddr = vpnsForCheck.filter((vpn: any) => {
+                return vpn['remote-address'] === req.body.remoteAddress
+            });
+            if (vpnsWithDuplicateAddr.length > 0) {
+                logger.error('Duplicate remote address');
+                return res.status(400).send('Duplicate remote address');
+            }
+
             await this.routerOsRepository.update(
                 api,
                 vpnId,
