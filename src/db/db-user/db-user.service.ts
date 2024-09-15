@@ -21,6 +21,7 @@ import {Request, Response} from "express";
 import {CrudInterface} from "../../common/crud.interface";
 import {DbUserRepository} from "./db-user.repository";
 import {prisma} from "../../prisma";
+import {RouterOSAPI} from "node-routeros";
 
 const className = 'DbUserService';
 
@@ -299,6 +300,7 @@ export class DbUserService implements CrudInterface {
         logger.debug(className + '.update');
         try {
             const {account, ...dataToCreate} = req.body;
+            const old = await this.repository.findUnique(dataToCreate.id);
             const response = await this.repository.update(dataToCreate);
             await prisma.log.create({
                 data: {
@@ -308,6 +310,63 @@ export class DbUserService implements CrudInterface {
                     userId: response.id,
                 },
             });
+            if (old.disabled === 0 && response.disabled === 1) {
+                for (const vpn of response.vpns) {
+                    const vpnWithRouter = await prisma.vpn.findUnique({
+                        where: {
+                            id: vpn.id,
+                            deleted: 0,
+                        },
+                        include: {
+                            router: true,
+                        },
+                    });
+                    if (vpnWithRouter) {
+                        const routerOSAPI = new RouterOSAPI({
+                            host: vpnWithRouter.router.localAddress,
+                            user: vpnWithRouter.router.login,
+                            password: vpnWithRouter.router.password,
+                            port: Number(process.env.TEST_ROUTER_PORT),
+                            timeout: Number(process.env.TEST_ROUTER_TIMEOUT),
+                        });
+                        try {
+                            const api = await routerOSAPI.connect();
+                            logger.info(`Successfully connected to: ${vpnWithRouter.router.localAddress}`);
+                            const params: string[] = [`=.id=${vpn.vpnId}`];
+                            params.push(`=disabled=yes`);
+                            console.log(params);
+                            await api.write('/ppp/secret/set', params);
+                            logger.info(`VPN updated in RouterOSAPI`);
+                            const disabledVpn = await prisma.vpn.update({
+                                where: {
+                                    id: vpn.id,
+                                },
+                                data: {
+                                    disabled: 1,
+                                },
+                            });
+                            logger.info('VPN disabled in DB');
+                            await prisma.log.create({
+                                data: {
+                                    action: 'update_vpn',
+                                    newValue: disabledVpn,
+                                    initiatorId: req.body.account.id,
+                                    vpnId: disabledVpn.id,
+                                },
+                            });
+                            logger.info('new log: "update_vpn"');
+                        } catch (error: unknown) {
+                            if (error instanceof Error) {
+                                logger.error(error.message);
+                                return res.status(500).send(error.message);
+                            } else {
+                                logger.error('Unexpected error');
+                                return res.status(500).send('Unexpected error');
+                            }
+                        }
+                    }
+                }
+            }
             return res.status(200).json(response);
         } catch (error: unknown) {
             if (error instanceof Error) {
