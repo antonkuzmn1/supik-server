@@ -66,11 +66,11 @@ dbRouterController.post(
     security.getAccountFromToken,
     middleware.accountShouldBeEditor,
     service.test,
-)
+);
 
 dbRouterController.post(
     '/sync/',
     security.getAccountFromToken,
     middleware.accountShouldBeEditor,
     service.sync,
-)
+);

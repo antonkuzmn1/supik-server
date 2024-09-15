@@ -153,8 +153,24 @@ export class DbRouterService implements CrudInterface {
             try {
                 const api = await routerOSAPI.connect();
                 logger.info('Successfully connected');
-                const profiles = await this.routerOsRepository.findProfiles(api);
-                return res.status(200).json({router, profiles});
+                const profiles = await this.routerOsRepository.findProfiles(api) as any;
+                const assignedIps = await api.write('/ppp/secret/print');
+                const poolsResult: { [p: string]: string[] } = {};
+                for (const profile of profiles) {
+                    if (profile['remote-address']) {
+                        const pools = await api.write('/ip/pool/print', [`?name=${profile['remote-address']}`]);
+                        const pool = pools[0];
+                        const ipList = this.generateIpRange(pool.ranges);
+                        const filteredIps = assignedIps.filter(secret => secret.profile === pool.name)
+                        const usedIps = filteredIps.map(secret => secret['remote-address']);
+                        poolsResult[profile.name] = ipList.filter(ip => !usedIps.includes(ip));
+                    }
+                }
+                return res.status(200).json({
+                    router,
+                    profiles,
+                    pools: poolsResult
+                });
             } catch (error) {
                 logger.error('Connection failed');
                 return res.status(200).json({router});
@@ -294,8 +310,6 @@ export class DbRouterService implements CrudInterface {
                     },
                 }
             }
-
-            console.log('Filter:', where)
 
             const response = await this.repository.findMany(where);
             return res.status(200).json(response);
@@ -657,6 +671,33 @@ export class DbRouterService implements CrudInterface {
                 return res.status(500).send('Unexpected error');
             }
         }
+    }
+
+    private generateIpRange = (range: any) => {
+        const [start, end] = range.split('-');
+        let currentIp = this.ipToLong(start);
+        const lastIp = this.ipToLong(end);
+        const ips = [];
+
+        while (currentIp <= lastIp) {
+            ips.push(this.longToIp(currentIp));
+            currentIp++;
+        }
+
+        return ips;
+    }
+
+    private ipToLong = (ip: any) => {
+        return ip.split('.').reduce((acc: any, octet: any) => (acc << 8) + parseInt(octet, 10), 0);
+    }
+
+    private longToIp = (long: any) => {
+        return [
+            (long >>> 24) & 255,
+            (long >>> 16) & 255,
+            (long >>> 8) & 255,
+            long & 255
+        ].join('.');
     }
 
 }
