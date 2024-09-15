@@ -161,7 +161,7 @@ export class DbRouterService implements CrudInterface {
                         const pools = await api.write('/ip/pool/print', [`?name=${profile['remote-address']}`]);
                         const pool = pools[0];
                         const ipList = this.generateIpRange(pool.ranges);
-                        const filteredIps = assignedIps.filter(secret => secret.profile === pool.name)
+                        const filteredIps = assignedIps.filter(secret => secret.profile === profile.name)
                         const usedIps = filteredIps.map(secret => secret['remote-address']);
                         poolsResult[profile.name] = ipList.filter(ip => !usedIps.includes(ip));
                     }
