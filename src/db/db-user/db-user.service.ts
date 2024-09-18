@@ -209,16 +209,6 @@ export class DbUserService implements CrudInterface {
                 }
             }
 
-            const department = req.query.department;
-            if (department) {
-                where = {
-                    ...where,
-                    department: {
-                        contains: department,
-                    },
-                }
-            }
-
             const title = req.query.title;
             if (title) {
                 where = {
@@ -257,7 +247,16 @@ export class DbUserService implements CrudInterface {
                 }
             }
 
-            console.log('Filter:', where)
+            const departmentId = req.query.departmentId as string
+            if (departmentId) {
+                where = {
+                    ...where,
+                    departmentId: {
+                        in: departmentId.split(',').map(Number),
+                    },
+                }
+            }
+
             const response = await this.repository.findMany(where);
             return res.status(200).json(response);
         } catch (error: unknown) {

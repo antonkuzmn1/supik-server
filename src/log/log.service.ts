@@ -74,6 +74,7 @@ export class LogService {
                     router: true,
                     vpn: true,
                     user: true,
+                    department: true,
                 },
                 orderBy: {
                     id: 'desc',

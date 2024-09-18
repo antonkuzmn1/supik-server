@@ -54,11 +54,11 @@ export class DbUserRepository {
         surname: string,
         patronymic: string,
         fullname: string,
-        department: string,
         title: string,
         login: string,
         password: string,
         disabled: 0 | 1,
+        departmentId: number,
     }): Promise<any> => {
         logger.debug(className + '.create');
         return prisma.user.create({
@@ -75,11 +75,11 @@ export class DbUserRepository {
         surname: string,
         patronymic: string,
         fullname: string,
-        department: string,
         title: string,
         login: string,
         password: string,
         disabled: 0 | 1,
+        departmentId: number,
     }): Promise<any> => {
         logger.debug(className + '.update');
         return prisma.user.update({

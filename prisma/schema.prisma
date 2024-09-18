@@ -56,8 +56,9 @@ model Group {
   name  String @default("") @db.VarChar(100)
   title String @default("") @db.VarChar(255)
 
-  accessRouters Int @default(0) @db.TinyInt()
-  accessUsers   Int @default(0) @db.TinyInt()
+  accessRouters     Int @default(0) @db.TinyInt()
+  accessUsers       Int @default(0) @db.TinyInt()
+  accessDepartments Int @default(0) @db.TinyInt()
 
   accountGroups     AccountGroup[]
   routerGroupViewer RouterGroupViewer[]
@@ -154,13 +155,35 @@ model User {
   surname    String @default("") @db.VarChar(50)
   patronymic String @default("") @db.VarChar(50)
   fullname   String @default("") @db.VarChar(150)
-  department String @default("") @db.VarChar(100)
   title      String @default("") @db.VarChar(100)
   login      String @default("") @db.VarChar(50)
   password   String @default("") @db.VarChar(50)
   disabled   Int    @default(0) @db.TinyInt()
 
-  vpns Vpn[]
+  departmentId Int?
+
+  vpns              Vpn[]
+  leaderDepartments Department[] @relation("leaderDepartment")
+
+  department Department? @relation("memberDepartment", fields: [departmentId], references: [id])
+
+  logs Log[]
+}
+
+model Department {
+  id      Int      @id @default(autoincrement())
+  created DateTime @default(now()) @db.Timestamp(0)
+  updated DateTime @updatedAt @db.Timestamp()
+  deleted Int      @default(0) @db.TinyInt()
+
+  name  String @default("") @db.VarChar(100)
+  title String @default("") @db.VarChar(255)
+
+  leaderId Int?
+
+  members User[] @relation("memberDepartment")
+
+  leader User? @relation("leaderDepartment", fields: [leaderId], references: [id])
 
   logs Log[]
 }
@@ -174,17 +197,19 @@ model Log {
 
   initiatorId Int
 
-  accountId Int?
-  groupId   Int?
-  routerId  Int?
-  vpnId     Int?
-  userId    Int?
+  accountId    Int?
+  groupId      Int?
+  routerId     Int?
+  vpnId        Int?
+  userId       Int?
+  departmentId Int?
 
   initiator Account @relation("initiator", fields: [initiatorId], references: [id])
 
-  account Account? @relation("account", fields: [accountId], references: [id])
-  group   Group?   @relation(fields: [groupId], references: [id])
-  router  Router?  @relation(fields: [routerId], references: [id])
-  vpn     Vpn?     @relation(fields: [vpnId], references: [id])
-  user    User?    @relation(fields: [userId], references: [id])
+  account    Account?    @relation("account", fields: [accountId], references: [id])
+  group      Group?      @relation(fields: [groupId], references: [id])
+  router     Router?     @relation(fields: [routerId], references: [id])
+  vpn        Vpn?        @relation(fields: [vpnId], references: [id])
+  user       User?       @relation(fields: [userId], references: [id])
+  department Department? @relation(fields: [departmentId], references: [id])
 }
