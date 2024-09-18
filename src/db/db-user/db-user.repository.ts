@@ -63,8 +63,12 @@ export class DbUserRepository {
         departmentId: number,
     }): Promise<any> => {
         logger.debug(className + '.create');
+        const {departmentId} = data;
         return prisma.user.create({
-            data: data,
+            data: {
+                ...data,
+                departmentId: departmentId ? Number(departmentId) : null,
+            },
             include: {
                 vpns: true,
             },
@@ -84,9 +88,13 @@ export class DbUserRepository {
         departmentId: number,
     }): Promise<any> => {
         logger.debug(className + '.update');
+        const {departmentId} = data;
         return prisma.user.update({
             where: {id: data.id},
-            data: data,
+            data: {
+                ...data,
+                departmentId: departmentId ? Number(departmentId) : null,
+            },
             include: {
                 vpns: true,
             },

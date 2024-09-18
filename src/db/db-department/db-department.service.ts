@@ -272,7 +272,7 @@ export class DbDepartmentService implements CrudInterface {
             const name = req.body.name;
             const title = req.body.title;
             const leaderId = req.body.leaderId;
-            const data = {name, title, leaderId};
+            const data = {name, title, leaderId: leaderId ? Number(leaderId) : null};
             logger.debug(`${className}.create - Parsed data: ${data}`);
             try {
                 const response = await prisma.department.create({data});
