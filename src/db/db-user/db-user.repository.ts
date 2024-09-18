@@ -35,6 +35,7 @@ export class DbUserRepository {
             },
             include: {
                 vpns: true,
+                department: true,
             },
         });
     }
@@ -45,6 +46,7 @@ export class DbUserRepository {
             where,
             include: {
                 vpns: true,
+                department: true,
             },
         });
     }

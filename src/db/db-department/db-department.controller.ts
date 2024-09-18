@@ -19,9 +19,11 @@ limitations under the License.
 import {Router} from "express";
 import {SecurityMiddleware} from "../../security/security.middleware";
 import {DbDepartmentMiddleware} from "./db-department.middleware";
+import {DbDepartmentService} from "./db-department.service";
 
 const security = new SecurityMiddleware();
 const middleware = new DbDepartmentMiddleware();
+const service = new DbDepartmentService();
 
 // /api/db/department
 export const dbDepartmentController = Router();
@@ -30,22 +32,26 @@ dbDepartmentController.get(
     '/',
     security.getAccountFromToken,
     middleware.accountShouldBeViewer,
+    service.get,
 );
 
 dbDepartmentController.post(
     '/',
     security.getAccountFromToken,
     middleware.accountShouldBeEditor,
+    service.post,
 );
 
 dbDepartmentController.put(
     '/',
     security.getAccountFromToken,
     middleware.accountShouldBeEditor,
+    service.put,
 );
 
 dbDepartmentController.delete(
     '/',
     security.getAccountFromToken,
     middleware.accountShouldBeEditor,
+    service.delete,
 );

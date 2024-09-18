@@ -236,11 +236,12 @@ export class DbDepartmentService implements CrudInterface {
 
             try {
 
-                const response = await prisma.user.findMany({
+                const response = await prisma.department.findMany({
                     where,
                     include: {
-                        vpns: true,
-                    },
+                        leader: true,
+                        members: true,
+                    }
                 });
                 logger.debug(`${className}.findMany - ${response.length} departments found`);
                 return res.status(200).json({departments: response});
@@ -281,7 +282,7 @@ export class DbDepartmentService implements CrudInterface {
                             action: 'create_department',
                             newValue: response,
                             initiatorId: req.body.account.id,
-                            userId: response.id,
+                            departmentId: response.id,
                         },
                     });
                     return res.status(200).json(log);
@@ -322,7 +323,8 @@ export class DbDepartmentService implements CrudInterface {
             const title = req.body.title;
             const leaderId = req.body.leaderId;
             const where = {id};
-            const data = {name, title, leaderId};
+            const data = {name, title, leaderId: leaderId ? Number(leaderId) : null};
+            console.log(data);
             logger.debug(`${className}.update - ID: ${id}, Parsed data: ${data}`);
             try {
                 const response = await prisma.department.update({where, data});
@@ -332,7 +334,7 @@ export class DbDepartmentService implements CrudInterface {
                             action: 'update_department',
                             newValue: response,
                             initiatorId: req.body.account.id,
-                            userId: response.id,
+                            departmentId: response.id,
                         },
                     });
                     return res.status(200).json(log);
@@ -380,7 +382,7 @@ export class DbDepartmentService implements CrudInterface {
                             action: 'delete_department',
                             newValue: response,
                             initiatorId: req.body.account.id,
-                            userId: response.id,
+                            departmentId: response.id,
                         },
                     });
                     return res.status(200).json(log);
