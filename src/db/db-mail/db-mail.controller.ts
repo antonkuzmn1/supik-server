@@ -54,3 +54,10 @@ dbMailController.delete(
     (req, res, next) => checkForAccess(req, res, next, 'accessMails', 'editor'),
     service.delete,
 );
+
+dbMailController.get(
+    '/sync/',
+    security.getAccountFromToken,
+    (req, res, next) => checkForAccess(req, res, next, 'accessMails', 'editor'),
+    service.syncAccounts,
+);

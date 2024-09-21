@@ -59,6 +59,7 @@ model Group {
   accessRouters     Int @default(0) @db.TinyInt()
   accessUsers       Int @default(0) @db.TinyInt()
   accessDepartments Int @default(0) @db.TinyInt()
+  accessMails       Int @default(0) @db.TinyInt()
 
   accountGroups     AccountGroup[]
   routerGroupViewer RouterGroupViewer[]
@@ -164,6 +165,7 @@ model User {
 
   vpns              Vpn[]
   leaderDepartments Department[] @relation("leaderDepartment")
+  mails             Mail[]
 
   department Department? @relation("memberDepartment", fields: [departmentId], references: [id])
 
@@ -188,6 +190,30 @@ model Department {
   logs Log[]
 }
 
+model Mail {
+  id      Int      @id @default(autoincrement())
+  created DateTime @default(now()) @db.Timestamp(0)
+  updated DateTime @updatedAt @db.Timestamp()
+  deleted Int      @default(0) @db.TinyInt()
+
+  mailId     String @default("") @db.VarChar(30)
+  nickname   String @default("") @db.VarChar(100)
+  email      String @default("") @db.VarChar(100)
+  nameFirst  String @default("") @db.VarChar(100)
+  nameLast   String @default("") @db.VarChar(100)
+  nameMiddle String @default("") @db.VarChar(100)
+  gender     String @default("") @db.VarChar(30)
+  position   String @default("") @db.VarChar(100)
+  isEnabled  Int    @default(1) @db.TinyInt()
+  isAdmin    Int    @default(0) @db.TinyInt()
+
+  userId Int?
+
+  user User? @relation(fields: [userId], references: [id])
+
+  logs Log[]
+}
+
 model Log {
   id      Int      @id @default(autoincrement())
   created DateTime @default(now()) @db.Timestamp(0)
@@ -203,6 +229,7 @@ model Log {
   vpnId        Int?
   userId       Int?
   departmentId Int?
+  mailId       Int?
 
   initiator Account @relation("initiator", fields: [initiatorId], references: [id])
 
@@ -212,4 +239,5 @@ model Log {
   vpn        Vpn?        @relation(fields: [vpnId], references: [id])
   user       User?       @relation(fields: [userId], references: [id])
   department Department? @relation(fields: [departmentId], references: [id])
+  Mail       Mail?       @relation(fields: [mailId], references: [id])
 }

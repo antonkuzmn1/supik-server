@@ -1,6 +1,6 @@
 {
   "name": "supik-server",
-  "version": "24.8.0",
+  "version": "24.9.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -25,6 +25,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.6",
+    "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
