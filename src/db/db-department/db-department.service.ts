@@ -17,83 +17,19 @@ limitations under the License.
 */
 
 import {logger} from "../../logger";
-import {CrudInterface} from "../../common/crud.interface";
 import {Request, Response} from "express";
 import {prisma} from "../../prisma";
+import {Crud} from "../../common/crud";
 
 const className = 'DbDepartmentService';
 
-export class DbDepartmentService implements CrudInterface {
+export class DbDepartmentService extends Crud {
 
     constructor() {
-        logger.debug(className);
+        super();
     }
 
-    get = async (req: Request, res: Response): Promise<Response> => {
-        logger.debug(className + '.get');
-        try {
-            if (req.query.id) {
-                return this.findUnique(req, res);
-            } else {
-                return this.findMany(req, res);
-            }
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                logger.error(error.message);
-                return res.status(500).send(error.message);
-            } else {
-                logger.error('Unexpected error');
-                return res.status(500).send('Unexpected error');
-            }
-        }
-    }
-
-    post = async (req: Request, res: Response): Promise<Response> => {
-        logger.debug(className + '.post');
-        try {
-            return this.create(req, res);
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                logger.error(error.message);
-                return res.status(500).send(error.message);
-            } else {
-                logger.error('Unexpected error');
-                return res.status(500).send('Unexpected error');
-            }
-        }
-    }
-
-    put = async (req: Request, res: Response): Promise<Response> => {
-        logger.debug(className + '.put');
-        try {
-            return this.update(req, res);
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                logger.error(error.message);
-                return res.status(500).send(error.message);
-            } else {
-                logger.error('Unexpected error');
-                return res.status(500).send('Unexpected error');
-            }
-        }
-    }
-
-    delete = async (req: Request, res: Response): Promise<Response> => {
-        logger.debug(className + '.delete');
-        try {
-            return this.softDelete(req, res);
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                logger.error(error.message);
-                return res.status(500).send(error.message);
-            } else {
-                logger.error('Unexpected error');
-                return res.status(500).send('Unexpected error');
-            }
-        }
-    }
-
-    private findUnique = async (req: Request, res: Response): Promise<Response> => {
+    protected findUnique = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.findUnique');
         try {
 
@@ -153,7 +89,7 @@ export class DbDepartmentService implements CrudInterface {
         }
     }
 
-    private findMany = async (req: Request, res: Response): Promise<Response> => {
+    protected findMany = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.findMany');
         try {
             logger.debug(`${className}.findMany - Received query params: ${req.query}`);
@@ -266,7 +202,7 @@ export class DbDepartmentService implements CrudInterface {
         }
     }
 
-    private create = async (req: Request, res: Response): Promise<Response> => {
+    protected create = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.create');
         try {
             const name = req.body.name;
@@ -315,7 +251,7 @@ export class DbDepartmentService implements CrudInterface {
         }
     }
 
-    private update = async (req: Request, res: Response): Promise<Response> => {
+    protected update = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.update');
         try {
             const id = req.body.id;
@@ -367,7 +303,7 @@ export class DbDepartmentService implements CrudInterface {
         }
     }
 
-    private softDelete = async (req: Request, res: Response): Promise<Response> => {
+    protected softDelete = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.softDelete');
         try {
             const id = req.body.id;
