@@ -23,6 +23,7 @@ import {dbRouterGroupEditorController} from "./db-router-group-editor/db-router-
 import {dbUserController} from "./db-user/db-user.controller";
 import {dbVpnController} from "./db-vpn/db-vpn.controller";
 import {dbDepartmentController} from "./db-department/db-department.controller";
+import {dbMailController} from "./db-mail/db-mail.controller";
 
 // /api/db
 export const dbController = Router()
@@ -33,3 +34,4 @@ dbController.use('/router-group-editor', dbRouterGroupEditorController);
 dbController.use('/user', dbUserController);
 dbController.use('/vpn', dbVpnController);
 dbController.use('/department', dbDepartmentController);
+dbController.use('/mail', dbMailController);
