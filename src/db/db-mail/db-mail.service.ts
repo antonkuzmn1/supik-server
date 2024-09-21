@@ -19,6 +19,7 @@ limitations under the License.
 import {logger} from "../../logger";
 import {Request, Response} from "express";
 import {Crud} from "../../common/crud";
+import {errorHandler} from "../../common/errorHandler";
 
 export class DbMailService extends Crud {
 
@@ -31,7 +32,7 @@ export class DbMailService extends Crud {
         try {
             return res.status(200).json();
         } catch (error: unknown) {
-            return this.errorHandler(error, res);
+            return errorHandler(error, res);
         }
     }
 
@@ -40,7 +41,7 @@ export class DbMailService extends Crud {
         try {
             return res.status(200).json();
         } catch (error: unknown) {
-            return this.errorHandler(error, res);
+            return errorHandler(error, res);
         }
     }
 
@@ -49,7 +50,7 @@ export class DbMailService extends Crud {
         try {
             return res.status(200).json();
         } catch (error: unknown) {
-            return this.errorHandler(error, res);
+            return errorHandler(error, res);
         }
     }
 
@@ -58,7 +59,7 @@ export class DbMailService extends Crud {
         try {
             return res.status(200).json();
         } catch (error: unknown) {
-            return this.errorHandler(error, res);
+            return errorHandler(error, res);
         }
     }
 
@@ -67,7 +68,7 @@ export class DbMailService extends Crud {
         try {
             return res.status(200).json();
         } catch (error: unknown) {
-            return this.errorHandler(error, res);
+            return errorHandler(error, res);
         }
     }
 
