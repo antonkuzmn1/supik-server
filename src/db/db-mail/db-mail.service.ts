@@ -129,16 +129,6 @@ export class DbMailService extends Crud {
                 }
             }
 
-            const gender = req.query.gender;
-            if (gender) {
-                where = {
-                    ...where,
-                    gender: {
-                        contains: gender,
-                    },
-                }
-            }
-
             const position = req.query.position;
             if (position) {
                 where = {
@@ -192,7 +182,6 @@ export class DbMailService extends Crud {
             const nameFirst = req.body.data.nameFirst;
             const nameLast = req.body.data.nameLast;
             const nameMiddle = req.body.data.nameMiddle;
-            const gender = req.body.data.gender;
             const position = req.body.data.position;
             const isAdmin = req.body.data.isAdmin;
             const password = req.body.data.password;
@@ -214,7 +203,6 @@ export class DbMailService extends Crud {
                             last: nameLast,
                             middle: nameMiddle,
                         },
-                        gender: gender,
                         position: position,
                         isAdmin: isAdmin,
                         password: password,
@@ -233,7 +221,6 @@ export class DbMailService extends Crud {
                     nameFirst: createdAccountByAPI.data.name.first,
                     nameLast: createdAccountByAPI.data.name.last,
                     nameMiddle: createdAccountByAPI.data.name.middle,
-                    gender: createdAccountByAPI.data.gender,
                     position: createdAccountByAPI.data.position,
                     isAdmin: createdAccountByAPI.data.isAdmin ? 1 : 0,
                     userId: userId ? userId : null,
@@ -275,7 +262,6 @@ export class DbMailService extends Crud {
             const nameFirst = req.body.data.nameFirst;
             const nameLast = req.body.data.nameLast;
             const nameMiddle = req.body.data.nameMiddle;
-            const gender = req.body.data.gender;
             const position = req.body.data.position;
             const isAdmin = req.body.data.isAdmin;
             const isEnabled = req.body.data.isEnabled;
@@ -305,10 +291,9 @@ export class DbMailService extends Crud {
                             last: nameLast,
                             middle: nameMiddle,
                         },
-                        gender: gender,
                         position: position,
                         isAdmin: !!isAdmin,
-                        isEnabled: isEnabled,
+                        isEnabled: !!isEnabled,
                         password: password.length > 0 ? password : null,
                     },
                     {
@@ -318,6 +303,7 @@ export class DbMailService extends Crud {
                         },
                     }
                 );
+                console.log('updatedAccountByAPI:', updatedAccountByAPI);
                 const where = {id};
                 const data = {
                     mailId: updatedAccountByAPI.data.id,
@@ -326,7 +312,6 @@ export class DbMailService extends Crud {
                     nameFirst: updatedAccountByAPI.data.name.first,
                     nameLast: updatedAccountByAPI.data.name.last,
                     nameMiddle: updatedAccountByAPI.data.name.middle,
-                    gender: updatedAccountByAPI.data.gender,
                     position: updatedAccountByAPI.data.position,
                     isEnabled: updatedAccountByAPI.data.isEnabled ? 1 : 0,
                     isAdmin: updatedAccountByAPI.data.isAdmin ? 1 : 0,
@@ -408,7 +393,6 @@ export class DbMailService extends Crud {
                         nameFirst: accountByAPI.name.first,
                         nameLast: accountByAPI.name.last,
                         nameMiddle: accountByAPI.name.middle,
-                        gender: accountByAPI.gender,
                         position: accountByAPI.position,
                         isEnabled: accountByAPI.isEnabled ? 1 : 0,
                         isAdmin: accountByAPI.isAdmin ? 1 : 0,
@@ -426,7 +410,6 @@ export class DbMailService extends Crud {
                         nameFirst: accountByAPI.name.first,
                         nameLast: accountByAPI.name.last,
                         nameMiddle: accountByAPI.name.middle,
-                        gender: accountByAPI.gender,
                         position: accountByAPI.position,
                         isEnabled: accountByAPI.isEnabled ? 1 : 0,
                         isAdmin: accountByAPI.isAdmin ? 1 : 0,
