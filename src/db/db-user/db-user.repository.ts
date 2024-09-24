@@ -36,6 +36,11 @@ export class DbUserRepository {
             include: {
                 vpns: true,
                 department: true,
+                mails: {
+                    where: {
+                        deleted: 0,
+                    }
+                },
             },
         });
     }
