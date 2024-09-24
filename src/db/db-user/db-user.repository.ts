@@ -59,6 +59,8 @@ export class DbUserRepository {
         title: string,
         login: string,
         password: string,
+        workplace: string,
+        phone: string,
         disabled: 0 | 1,
         departmentId: number,
     }): Promise<any> => {
@@ -84,6 +86,8 @@ export class DbUserRepository {
         title: string,
         login: string,
         password: string,
+        workplace: string,
+        phone: string,
         disabled: 0 | 1,
         departmentId: number,
     }): Promise<any> => {

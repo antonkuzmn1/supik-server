@@ -159,6 +159,8 @@ model User {
   title      String @default("") @db.VarChar(100)
   login      String @default("") @db.VarChar(50)
   password   String @default("") @db.VarChar(50)
+  workplace  String @default("") @db.VarChar(100)
+  phone      String @default("") @db.VarChar(30)
   disabled   Int    @default(0) @db.TinyInt()
 
   departmentId Int?
