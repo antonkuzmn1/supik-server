@@ -99,6 +99,16 @@ export class DbMailService extends Crud {
                 }
             }
 
+            const password = req.query.password;
+            if (password) {
+                where = {
+                    ...where,
+                    password: {
+                        contains: password,
+                    },
+                }
+            }
+
             const nameFirst = req.query.nameFirst;
             if (nameFirst) {
                 where = {
@@ -179,12 +189,12 @@ export class DbMailService extends Crud {
         logger.debug(funcName);
         try {
             const nickname = req.body.data.nickname;
+            const password = req.body.data.password;
             const nameFirst = req.body.data.nameFirst;
             const nameLast = req.body.data.nameLast;
             const nameMiddle = req.body.data.nameMiddle;
             const position = req.body.data.position;
             const isAdmin = req.body.data.isAdmin;
-            const password = req.body.data.password;
             const userId = req.body.data.userId;
 
             const mailYandexToken = process.env.MAIL_YANDEX_TOKEN;
@@ -217,6 +227,7 @@ export class DbMailService extends Crud {
                 const data = {
                     mailId: createdAccountByAPI.data.id,
                     nickname: createdAccountByAPI.data.nickname,
+                    password: password,
                     email: createdAccountByAPI.data.email,
                     nameFirst: createdAccountByAPI.data.name.first,
                     nameLast: createdAccountByAPI.data.name.last,
@@ -259,13 +270,13 @@ export class DbMailService extends Crud {
         try {
             const id = req.body.data.id;
             const nickname = req.body.data.nickname;
+            const password = req.body.data.password;
             const nameFirst = req.body.data.nameFirst;
             const nameLast = req.body.data.nameLast;
             const nameMiddle = req.body.data.nameMiddle;
             const position = req.body.data.position;
             const isAdmin = req.body.data.isAdmin;
             const isEnabled = req.body.data.isEnabled;
-            const password = req.body.data.password;
             const userId = req.body.data.userId;
 
             const mailYandexToken = process.env.MAIL_YANDEX_TOKEN;
@@ -279,6 +290,8 @@ export class DbMailService extends Crud {
             }
 
             const mailId = mailEntity.mailId;
+
+            const passwordIsEquals = mailEntity.password === password;
 
             try {
                 const updatedAccountByAPI = await axios.patch(
@@ -294,7 +307,7 @@ export class DbMailService extends Crud {
                         position: position,
                         isAdmin: !!isAdmin,
                         isEnabled: !!isEnabled,
-                        password: password.length > 0 ? password : null,
+                        password: password.length > 0 && !passwordIsEquals ? password : null,
                     },
                     {
                         headers: {
@@ -305,7 +318,7 @@ export class DbMailService extends Crud {
                 );
                 console.log('updatedAccountByAPI:', updatedAccountByAPI);
                 const where = {id};
-                const data = {
+                const dataWithoutPassword = {
                     mailId: updatedAccountByAPI.data.id,
                     nickname: updatedAccountByAPI.data.nickname,
                     email: updatedAccountByAPI.data.email,
@@ -317,6 +330,7 @@ export class DbMailService extends Crud {
                     isAdmin: updatedAccountByAPI.data.isAdmin ? 1 : 0,
                     userId: userId ? userId : null,
                 }
+                const data = password.length > 0 ? {...dataWithoutPassword, password} : dataWithoutPassword;
                 console.log(data);
 
                 try {
@@ -338,7 +352,13 @@ export class DbMailService extends Crud {
                 }
             } catch (error: unknown) {
                 console.error((error as AxiosError).response?.data);
-                return errorHandler(error, res);
+                if (error instanceof AxiosError) {
+                    logger.error(error.response?.data.message);
+                    return res.status(500).send(error.response?.data.message);
+                } else {
+                    logger.error('Unexpected error');
+                    return res.status(500).send('Unexpected error');
+                }
             }
         } catch (error: unknown) {
             return errorHandler(error, res);
