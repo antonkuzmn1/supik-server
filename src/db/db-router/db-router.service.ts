@@ -273,6 +273,16 @@ export class DbRouterService implements CrudInterface {
                 }
             }
 
+            const defaultProfile = req.query.defaultProfile;
+            if (defaultProfile) {
+                where = {
+                    ...where,
+                    defaultProfile: {
+                        contains: defaultProfile,
+                    },
+                }
+            }
+
             const name = req.query.name;
             if (name) {
                 where = {

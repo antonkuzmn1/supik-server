@@ -368,16 +368,6 @@ export class DbVpnService implements CrudInterface {
                 }
             }
 
-            const profile = req.query.profile;
-            if (profile) {
-                where = {
-                    ...where,
-                    profile: {
-                        contains: profile,
-                    },
-                }
-            }
-
             const service = req.query.service;
             if (service) {
                 where = {

@@ -153,16 +153,18 @@ model User {
   updated DateTime @updatedAt @db.Timestamp()
   deleted Int      @default(0) @db.TinyInt()
 
-  name       String @default("") @db.VarChar(50)
-  surname    String @default("") @db.VarChar(50)
-  patronymic String @default("") @db.VarChar(50)
-  fullname   String @default("") @db.VarChar(150)
-  title      String @default("") @db.VarChar(100)
-  login      String @default("") @db.VarChar(50)
-  password   String @default("") @db.VarChar(50)
-  workplace  String @default("") @db.VarChar(100)
-  phone      String @default("") @db.VarChar(30)
-  disabled   Int    @default(0) @db.TinyInt()
+  name           String @default("") @db.VarChar(50)
+  surname        String @default("") @db.VarChar(50)
+  patronymic     String @default("") @db.VarChar(50)
+  fullname       String @default("") @db.VarChar(150)
+  title          String @default("") @db.VarChar(100)
+  login          String @default("") @db.VarChar(50)
+  password       String @default("") @db.VarChar(50)
+  workplace      String @default("") @db.VarChar(100)
+  localWorkplace String @default("") @db.VarChar(100)
+  phone          String @default("") @db.VarChar(30)
+  cellular       String @default("") @db.VarChar(30)
+  disabled       Int    @default(0) @db.TinyInt()
 
   departmentId Int?
 

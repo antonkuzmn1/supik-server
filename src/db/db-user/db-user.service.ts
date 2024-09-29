@@ -239,6 +239,46 @@ export class DbUserService implements CrudInterface {
                 }
             }
 
+            const workplace = req.query.workplace;
+            if (workplace) {
+                where = {
+                    ...where,
+                    workplace: {
+                        contains: workplace,
+                    },
+                }
+            }
+
+            const localWorkplace = req.query.localWorkplace;
+            if (localWorkplace) {
+                where = {
+                    ...where,
+                    localWorkplace: {
+                        contains: localWorkplace,
+                    },
+                }
+            }
+
+            const phone = req.query.phone;
+            if (phone) {
+                where = {
+                    ...where,
+                    phone: {
+                        contains: phone,
+                    },
+                }
+            }
+
+            const cellular = req.query.cellular;
+            if (cellular) {
+                where = {
+                    ...where,
+                    cellular: {
+                        contains: cellular,
+                    },
+                }
+            }
+
             const disabled = req.query.disabled;
             if (disabled !== undefined) {
                 where = {
