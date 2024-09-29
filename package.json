@@ -1,6 +1,6 @@
 {
   "name": "supik-server",
-  "version": "24.10.10",
+  "version": "24.11.3",
   "description": "",
   "main": "index.js",
   "scripts": {

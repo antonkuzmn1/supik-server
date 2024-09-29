@@ -146,6 +146,14 @@ export class SecurityGroupService {
                     }
                 }
 
+                const accessMails = req.query.accessMails;
+                if (accessMails !== undefined) {
+                    where = {
+                        ...where,
+                        accessMails:  accessMails === 'editor' ? 2 : accessMails === 'viewer' ? 1 : 0,
+                    }
+                }
+
                 const response = await prisma.group.findMany({
                     where,
                     include: {
@@ -177,6 +185,7 @@ export class SecurityGroupService {
                 accessRouters,
                 accessUsers,
                 accessDepartments,
+                accessMails,
             } = req.body;
 
             const response = await prisma.group.create({
@@ -186,6 +195,7 @@ export class SecurityGroupService {
                     accessRouters: Number(accessRouters),
                     accessUsers: Number(accessUsers),
                     accessDepartments: Number(accessDepartments),
+                    accessMails: Number(accessMails),
                 },
             });
 
@@ -227,6 +237,7 @@ export class SecurityGroupService {
                 accessRouters,
                 accessUsers,
                 accessDepartments,
+                accessMails,
             } = req.body;
 
             const response = await prisma.group.update({
@@ -239,6 +250,7 @@ export class SecurityGroupService {
                     accessRouters: Number(accessRouters),
                     accessUsers: Number(accessUsers),
                     accessDepartments: Number(accessDepartments),
+                    accessMails: Number(accessMails),
                 },
             });
 
