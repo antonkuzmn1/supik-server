@@ -329,7 +329,7 @@ export class DbRouterService implements CrudInterface {
         const {account, ...dataToCreate} = req.body;
         let fileBuffer = null;
         if (dataToCreate.certificate) {
-            const base64Data = dataToCreate.certificate.replace(/^data:.*;base64,/, ''); // Удаление префикса
+            const base64Data = dataToCreate.certificate.replace(/^data:.*;base64,/, '');
             fileBuffer = Buffer.from(base64Data, 'base64');
         }
         if (!dataToCreate.disabled && dataToCreate.remoteAddress.length < 7) {
@@ -346,6 +346,7 @@ export class DbRouterService implements CrudInterface {
                 password: dataToCreate.password,
                 localAddress: dataToCreate.localAddress,
                 remoteAddress: dataToCreate.remoteAddress,
+                defaultProfile: dataToCreate.defaultProfile,
                 name: dataToCreate.name,
                 title: dataToCreate.title,
                 disabled: dataToCreate.disabled,
@@ -395,6 +396,7 @@ export class DbRouterService implements CrudInterface {
                 password: dataToCreate.password,
                 localAddress: dataToCreate.localAddress,
                 remoteAddress: dataToCreate.remoteAddress,
+                defaultProfile: dataToCreate.defaultProfile,
                 name: dataToCreate.name,
                 title: dataToCreate.title,
                 disabled: dataToCreate.disabled,

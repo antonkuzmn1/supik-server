@@ -84,13 +84,14 @@ model Router {
   updated DateTime @updatedAt @db.Timestamp()
   deleted Int      @default(0) @db.TinyInt()
 
-  login         String @default("") @db.VarChar(100)
-  password      String @default("") @db.VarChar(100)
-  localAddress  String @default("") @db.VarChar(15)
-  remoteAddress String @default("") @db.VarChar(15)
-  name          String @default("") @db.VarChar(100)
-  title         String @default("") @db.VarChar(255)
-  disabled      Int    @default(0) @db.TinyInt()
+  login          String @default("") @db.VarChar(100)
+  password       String @default("") @db.VarChar(100)
+  localAddress   String @default("") @db.VarChar(15)
+  remoteAddress  String @default("") @db.VarChar(15)
+  defaultProfile String @default("") @db.VarChar(50)
+  name           String @default("") @db.VarChar(100)
+  title          String @default("") @db.VarChar(255)
+  disabled       Int    @default(0) @db.TinyInt()
 
   certificate Bytes?
   l2tpKey     String @default("") @db.VarChar(100)
