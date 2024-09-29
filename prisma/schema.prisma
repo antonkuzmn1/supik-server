@@ -89,6 +89,7 @@ model Router {
   localAddress   String @default("") @db.VarChar(15)
   remoteAddress  String @default("") @db.VarChar(15)
   defaultProfile String @default("") @db.VarChar(50)
+  prefix         String @default("") @db.VarChar(30)
   name           String @default("") @db.VarChar(100)
   title          String @default("") @db.VarChar(255)
   disabled       Int    @default(0) @db.TinyInt()

@@ -283,6 +283,16 @@ export class DbRouterService implements CrudInterface {
                 }
             }
 
+            const prefix = req.query.prefix;
+            if (prefix) {
+                where = {
+                    ...where,
+                    prefix: {
+                        contains: prefix,
+                    },
+                }
+            }
+
             const name = req.query.name;
             if (name) {
                 where = {
@@ -357,6 +367,7 @@ export class DbRouterService implements CrudInterface {
                 localAddress: dataToCreate.localAddress,
                 remoteAddress: dataToCreate.remoteAddress,
                 defaultProfile: dataToCreate.defaultProfile,
+                prefix: dataToCreate.prefix,
                 name: dataToCreate.name,
                 title: dataToCreate.title,
                 disabled: dataToCreate.disabled,
@@ -407,6 +418,7 @@ export class DbRouterService implements CrudInterface {
                 localAddress: dataToCreate.localAddress,
                 remoteAddress: dataToCreate.remoteAddress,
                 defaultProfile: dataToCreate.defaultProfile,
+                prefix: dataToCreate.prefix,
                 name: dataToCreate.name,
                 title: dataToCreate.title,
                 disabled: dataToCreate.disabled,

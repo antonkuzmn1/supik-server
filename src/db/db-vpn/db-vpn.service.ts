@@ -378,7 +378,6 @@ export class DbVpnService implements CrudInterface {
                 }
             }
 
-
             const remoteAddress = req.query.remoteAddress;
             if (remoteAddress) {
                 where = {
