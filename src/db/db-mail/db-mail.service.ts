@@ -368,7 +368,44 @@ export class DbMailService extends Crud {
         const funcName = this.className + '.softDelete';
         logger.debug(funcName);
         try {
-            return res.status(200).send('Not working');
+            const mailYandexToken = process.env.MAIL_YANDEX_TOKEN;
+            const mailYandexOrgId = process.env.MAIL_YANDEX_ORG_ID;
+
+            const id = req.body.id;
+            const where = {id}
+            const mail = await prisma.mail.findUnique({where});
+            if (!mail) {
+                return res.status(404).json({error: `Mail with ID:${id} Not Found`});
+            }
+
+            const mailId = mail.mailId;
+
+            try {
+                const updatedAccountByAPI = await axios.get(
+                    `https://api360.yandex.net/directory/v1/org/${mailYandexOrgId}/users/${mailId}`,
+                    {
+                        headers: {
+                            'Authorization': `OAuth ${mailYandexToken}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                )
+                return res.status(500).send('First, delete this mailbox in admin.yandex.ru');
+            } catch (error: unknown) {
+                const response = await prisma.mail.update({
+                    where: {id},
+                    data: {deleted: 1}
+                });
+                await prisma.log.create({
+                    data: {
+                        action: 'delete_mail',
+                        newValue: response,
+                        initiatorId: req.body.account.id,
+                        mailId: response.id,
+                    },
+                });
+                return res.status(200).json(response);
+            }
         } catch (error: unknown) {
             return errorHandler(error, res);
         }
