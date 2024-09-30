@@ -109,7 +109,16 @@ export class DbUserRepository {
                 departmentId: departmentId ? Number(departmentId) : null,
             },
             include: {
-                vpns: true,
+                vpns: {
+                    where: {
+                        deleted: 0,
+                    }
+                },
+                mails: {
+                    where: {
+                        deleted: 0,
+                    }
+                },
             },
         });
     }

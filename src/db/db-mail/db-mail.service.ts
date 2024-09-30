@@ -316,7 +316,6 @@ export class DbMailService extends Crud {
                         },
                     }
                 );
-                console.log('updatedAccountByAPI:', updatedAccountByAPI);
                 const where = {id};
                 const dataWithoutPassword = {
                     mailId: updatedAccountByAPI.data.id,

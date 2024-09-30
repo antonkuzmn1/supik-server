@@ -22,6 +22,7 @@ import {CrudInterface} from "../../common/crud.interface";
 import {DbUserRepository} from "./db-user.repository";
 import {prisma} from "../../prisma";
 import {RouterOSAPI} from "node-routeros";
+import axios, {AxiosError} from "axios";
 
 const className = 'DbUserService';
 
@@ -402,6 +403,58 @@ export class DbUserService implements CrudInterface {
                                 logger.error('Unexpected error');
                                 return res.status(500).send('Unexpected error');
                             }
+                        }
+                    }
+                }
+                for (const mail of response.mails) {
+                    try {
+                        const mailYandexToken = process.env.MAIL_YANDEX_TOKEN;
+                        const mailYandexOrgId = process.env.MAIL_YANDEX_ORG_ID;
+                        const mailId = mail.mailId;
+                        logger.debug(`Before disable Mail for Yandex: ${mail.id}`);
+                        await axios.patch(
+                            `https://api360.yandex.net/directory/v1/org/${mailYandexOrgId}/users/${mailId}`,
+                            {
+                                isEnabled: false,
+                            },
+                            {
+                                headers: {
+                                    'Authorization': `OAuth ${mailYandexToken}`,
+                                    'Content-Type': 'application/json',
+                                },
+                            }
+                        );
+                        logger.debug(`Successfully disabled: ${mail.id}`);
+                        try {
+                            const where = {id: mail.id};
+                            const data = {isEnabled: 0};
+                            const newValue = await prisma.mail.update({where, data});
+
+                            await prisma.log.create({
+                                data: {
+                                    action: 'update_mail',
+                                    newValue: newValue,
+                                    initiatorId: req.body.account.id,
+                                    mailId: newValue.id,
+                                },
+                            })
+                        } catch (error: unknown) {
+                            if (error instanceof Error) {
+                                logger.error(error.message);
+                                return res.status(500).send(error.message);
+                            } else {
+                                logger.error('Unexpected error');
+                                return res.status(500).send('Unexpected error');
+                            }
+                        }
+                    } catch (error: unknown) {
+                        console.error((error as AxiosError).response?.data);
+                        if (error instanceof AxiosError) {
+                            logger.error(error.response?.data.message);
+                            return res.status(500).send(error.response?.data.message);
+                        } else {
+                            logger.error('Unexpected error');
+                            return res.status(500).send('Unexpected error');
                         }
                     }
                 }
