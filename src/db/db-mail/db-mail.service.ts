@@ -353,6 +353,24 @@ export class DbMailService extends Crud {
                 console.error((error as AxiosError).response?.data);
                 if (error instanceof AxiosError) {
                     logger.error(error.response?.data.message);
+                    if (error.response?.data?.message === 'password.equals_previous') {
+                        console.error('equals');
+                        const where = {id};
+                        const data = {password};
+
+                        const newValue = await prisma.mail.update({where, data});
+
+                        await prisma.log.create({
+                            data: {
+                                action: 'update_mail',
+                                newValue: newValue,
+                                initiatorId: req.body.account.id,
+                                mailId: newValue.id,
+                            },
+                        })
+
+                        return res.status(500).send('password.equals_previous.changed_in_database');
+                    }
                     return res.status(500).send(error.response?.data.message);
                 } else {
                     logger.error('Unexpected error');
