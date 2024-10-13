@@ -315,6 +315,14 @@ export class DbUserService implements CrudInterface {
         logger.debug(className + '.create');
         try {
             const {account, ...dataToCreate} = req.body;
+            const duplicateLogins = await prisma.user.findMany({
+                where: {
+                    login: dataToCreate.login
+                }
+            });
+            if (duplicateLogins.length > 0) {
+                return res.status(400).send('Login already exists');
+            }
             const response = await this.repository.create(dataToCreate);
             await prisma.log.create({
                 data: {
@@ -340,6 +348,17 @@ export class DbUserService implements CrudInterface {
         logger.debug(className + '.update');
         try {
             const {account, ...dataToCreate} = req.body;
+            const duplicateLogins = await prisma.user.findMany({
+                where: {
+                    id: {
+                        not: dataToCreate.id
+                    },
+                    login: dataToCreate.login
+                }
+            });
+            if (duplicateLogins.length > 0) {
+                return res.status(400).send('Login already exists');
+            }
             const old = await this.repository.findUnique(dataToCreate.id);
             const response = await this.repository.update(dataToCreate);
             await prisma.log.create({
