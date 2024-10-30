@@ -19,6 +19,7 @@ limitations under the License.
 import {Request, Response} from 'express';
 import {logger} from "../logger";
 import {prisma} from "../prisma";
+import {DbUserService} from "../db/db-user/db-user.service";
 
 export interface NewLog {
     action: 'create' | 'update' | 'delete',
@@ -42,6 +43,36 @@ export class LogService {
     async getAll(req: Request, res: Response): Promise<Response> {
         logger.debug(className + '.get');
         try {
+
+            if (req.query.id) {
+                const id = Number(req.query.id);
+                if (!id) {
+                    logger.error('ID is undefined');
+                    return res.status(403).send('ID is undefined');
+                }
+
+                const response = await prisma.log.findUnique({
+                    where: {
+                        id: Number(id),
+                    },
+                    include: {
+                        initiator: true,
+                        account: true,
+                        group: true,
+                        router: true,
+                        vpn: true,
+                        user: true,
+                        department: true,
+                        Mail: true,
+                    },
+                });
+                if (!response) {
+                    logger.error(`Entity with ID ${id} not found`);
+                    return res.status(403).send(`Entity with ID ${id} not found`);
+                }
+
+                return res.status(200).json(response);
+            }
 
             let where: any = {}
 
@@ -75,11 +106,12 @@ export class LogService {
                     vpn: true,
                     user: true,
                     department: true,
+                    Mail: true,
                 },
                 orderBy: {
                     id: 'desc',
                 },
-                // take: 100,
+                take: 100,
             });
 
             return res.status(200).json(logs);
