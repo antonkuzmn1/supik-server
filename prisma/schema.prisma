@@ -235,9 +235,7 @@ model MailGroup {
   description String @default("") @db.VarChar(255)
   label       String @default("") @db.VarChar(50)
 
-  members          MailMailGroup[]
-  mailGroups       MailGroupMailGroup[] @relation("Children")
-  mailGroupsParent MailGroupMailGroup[] @relation("Parent")
+  members MailMailGroup[]
 
   logs Log[]
 }
@@ -250,16 +248,6 @@ model MailMailGroup {
   mailGroup MailGroup @relation(fields: [mailGroupId], references: [id])
 
   @@id([mailId, mailGroupId])
-}
-
-model MailGroupMailGroup {
-  mailGroupId       Int
-  mailGroupIdParent Int
-
-  mailGroup       MailGroup @relation("Children", fields: [mailGroupId], references: [id])
-  mailGroupParent MailGroup @relation("Parent", fields: [mailGroupIdParent], references: [id])
-
-  @@id([mailGroupId, mailGroupIdParent])
 }
 
 model Log {
