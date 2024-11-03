@@ -43,12 +43,6 @@ export class DbMailGroupService extends Crud {
                 members: {
                     include: {mail: true}
                 },
-                mailGroups: {
-                    include: {
-                        mailGroup: true,
-                        mailGroupParent: true,
-                    }
-                }
             };
             const data = await prisma.mailGroup.findUnique({where, include});
             if (!data) {
@@ -143,12 +137,6 @@ export class DbMailGroupService extends Crud {
                 members: {
                     include: {mail: true}
                 },
-                mailGroups: {
-                    include: {
-                        mailGroup: true,
-                        mailGroupParent: true,
-                    }
-                }
             };
             const data = await prisma.mailGroup.findMany({where, include});
 
