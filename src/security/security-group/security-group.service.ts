@@ -134,7 +134,7 @@ export class SecurityGroupService {
                 if (accessUsers !== undefined) {
                     where = {
                         ...where,
-                        accessRouters:  accessUsers === 'editor' ? 2 : accessUsers === 'viewer' ? 1 : 0,
+                        accessUsers:  accessUsers === 'editor' ? 2 : accessUsers === 'viewer' ? 1 : 0,
                     }
                 }
 
@@ -151,6 +151,14 @@ export class SecurityGroupService {
                     where = {
                         ...where,
                         accessMails:  accessMails === 'editor' ? 2 : accessMails === 'viewer' ? 1 : 0,
+                    }
+                }
+
+                const accessMailGroups = req.query.accessMailGroups;
+                if (accessMails !== undefined) {
+                    where = {
+                        ...where,
+                        accessMails:  accessMailGroups === 'editor' ? 2 : accessMailGroups === 'viewer' ? 1 : 0,
                     }
                 }
 
@@ -186,6 +194,7 @@ export class SecurityGroupService {
                 accessUsers,
                 accessDepartments,
                 accessMails,
+                accessMailGroups,
             } = req.body;
 
             const response = await prisma.group.create({
@@ -196,6 +205,7 @@ export class SecurityGroupService {
                     accessUsers: Number(accessUsers),
                     accessDepartments: Number(accessDepartments),
                     accessMails: Number(accessMails),
+                    accessMailGroups: Number(accessMailGroups),
                 },
             });
 
@@ -238,6 +248,7 @@ export class SecurityGroupService {
                 accessUsers,
                 accessDepartments,
                 accessMails,
+                accessMailGroups,
             } = req.body;
 
             const response = await prisma.group.update({
@@ -251,6 +262,7 @@ export class SecurityGroupService {
                     accessUsers: Number(accessUsers),
                     accessDepartments: Number(accessDepartments),
                     accessMails: Number(accessMails),
+                    accessMailGroups: Number(accessMailGroups),
                 },
             });
 

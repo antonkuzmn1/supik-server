@@ -21,7 +21,11 @@ import {NextFunction, Request, Response} from "express";
 import {AccountGroup, Group} from "@prisma/client";
 import {errorHandler} from "./errorHandler";
 
-export type GroupAccess = 'accessRouters' | 'accessUsers' | 'accessDepartments' | 'accessMails'
+export type GroupAccess = 'accessRouters'
+    | 'accessUsers'
+    | 'accessDepartments'
+    | 'accessMails'
+    | 'accessMailGroups'
 
 export const checkForAccess = (
     req: Request,

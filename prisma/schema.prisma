@@ -60,6 +60,7 @@ model Group {
   accessUsers       Int @default(0) @db.TinyInt()
   accessDepartments Int @default(0) @db.TinyInt()
   accessMails       Int @default(0) @db.TinyInt()
+  accessMailGroups  Int @default(0) @db.TinyInt()
 
   accountGroups     AccountGroup[]
   routerGroupViewer RouterGroupViewer[]
@@ -218,7 +219,47 @@ model Mail {
 
   user User? @relation(fields: [userId], references: [id])
 
+  groups MailMailGroup[]
+
   logs Log[]
+}
+
+model MailGroup {
+  id      Int      @id @default(autoincrement())
+  created DateTime @default(now()) @db.Timestamp(0)
+  updated DateTime @updatedAt @db.Timestamp()
+  deleted Int      @default(0) @db.TinyInt()
+
+  mailGroupId String @default("") @db.VarChar(30)
+  name        String @default("") @db.VarChar(100)
+  description String @default("") @db.VarChar(255)
+  label       String @default("") @db.VarChar(50)
+
+  members          MailMailGroup[]
+  mailGroups       MailGroupMailGroup[] @relation("Children")
+  mailGroupsParent MailGroupMailGroup[] @relation("Parent")
+
+  logs Log[]
+}
+
+model MailMailGroup {
+  mailId      Int
+  mailGroupId Int
+
+  mail      Mail      @relation(fields: [mailId], references: [id])
+  mailGroup MailGroup @relation(fields: [mailGroupId], references: [id])
+
+  @@id([mailId, mailGroupId])
+}
+
+model MailGroupMailGroup {
+  mailGroupId       Int
+  mailGroupIdParent Int
+
+  mailGroup       MailGroup @relation("Children", fields: [mailGroupId], references: [id])
+  mailGroupParent MailGroup @relation("Parent", fields: [mailGroupIdParent], references: [id])
+
+  @@id([mailGroupId, mailGroupIdParent])
 }
 
 model Log {
@@ -237,6 +278,7 @@ model Log {
   userId       Int?
   departmentId Int?
   mailId       Int?
+  mailGroupId  Int?
 
   initiator Account @relation("initiator", fields: [initiatorId], references: [id])
 
@@ -247,4 +289,5 @@ model Log {
   user       User?       @relation(fields: [userId], references: [id])
   department Department? @relation(fields: [departmentId], references: [id])
   Mail       Mail?       @relation(fields: [mailId], references: [id])
+  MailGroup  MailGroup?  @relation(fields: [mailGroupId], references: [id])
 }
