@@ -54,3 +54,11 @@ dbMailGroupController.delete(
     (req, res, next) => checkForAccess(req, res, next, 'accessMailGroups', 'editor'),
     service.delete,
 );
+
+dbMailGroupController.get(
+    '/sync/',
+    security.getAccountFromToken,
+    (req, res, next) => checkForAccess(req, res, next, 'accessMailGroups', 'editor'),
+    service.syncAccounts,
+);
+

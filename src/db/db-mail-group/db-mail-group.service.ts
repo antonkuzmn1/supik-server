@@ -332,63 +332,117 @@ export class DbMailGroupService extends Crud {
         }
     }
 
-    // syncAccounts = async (req: Request, res: Response): Promise<Response> => {
-    //     const funcName = this.className + '.syncAccounts';
-    //     logger.debug(funcName);
-    //     try {
-    //         const mailYandexToken = process.env.MAIL_YANDEX_TOKEN;
-    //         const mailYandexOrgId = process.env.MAIL_YANDEX_ORG_ID;
-    //
-    //         const groupsByAPI = await axios.get(
-    //             `https://api360.yandex.net/directory/v1/org/${mailYandexOrgId}/groups?perPage=999999`,
-    //             {
-    //                 headers: {
-    //                     'Authorization': `OAuth ${mailYandexToken}`,
-    //                     'Content-Type': 'application/json',
-    //                 },
-    //             },
-    //         );
-    //
-    //         console.log('groupsByAPI:', groupsByAPI.data.groups.length);
-    //
-    //         await prisma.mailGroup.updateMany({
-    //             where: {deleted: 0},
-    //             data: {deleted: 1}
-    //         })
-    //
-    //         for (const groupByAPI of groupsByAPI.data.groups) {
-    //             const where = {
-    //                 mailGroupId: groupByAPI.id,
-    //             }
-    //             const groupsByMailGroupId = await prisma.mailGroup.findMany({where});
-    //             if (groupsByMailGroupId.length > 0) {
-    //                 const groupByDB = groupsByMailGroupId[groupsByMailGroupId.length - 1] as any
-    //                 const data = {
-    //                     mailId: groupsByAPI.data.groups.id,
-    //                     name: groupsByAPI.data.groups.name,
-    //                     description: groupsByAPI.data.groups.description,
-    //                     nameFirst: groupsByAPI.data.groups.label,
-    //                     deleted: 0,
-    //                 }
-    //                 await prisma.mailGroup.update({
-    //                     where: {id: groupByDB.id},
-    //                     data,
-    //                 })
-    //             } else {
-    //                 const data = {
-    //                     mailId: groupsByAPI.data.groups.id,
-    //                     name: groupsByAPI.data.groups.name,
-    //                     description: groupsByAPI.data.groups.description,
-    //                     nameFirst: groupsByAPI.data.groups.label,
-    //                 }
-    //                 await prisma.mail.create({data})
-    //                 logger.info('created new group by sync');
-    //             }
-    //         }
-    //
-    //         return res.status(200).json({info: 'Success'});
-    //     } catch (error: unknown) {
-    //         return errorHandler(error, res);
-    //     }
-    // }
+    syncAccounts = async (req: Request, res: Response): Promise<Response> => {
+        const funcName = this.className + '.syncAccounts';
+        logger.debug(funcName);
+        try {
+            const mailYandexToken = process.env.MAIL_YANDEX_TOKEN;
+            const mailYandexOrgId = process.env.MAIL_YANDEX_ORG_ID;
+
+            const groupsByAPI = await axios.get(
+                `https://api360.yandex.net/directory/v1/org/${mailYandexOrgId}/groups?perPage=999999`,
+                {
+                    headers: {
+                        'Authorization': `OAuth ${mailYandexToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                },
+            );
+
+            console.log('groupsByAPI:', groupsByAPI.data.groups.length);
+
+            await prisma.mailGroup.updateMany({
+                where: {deleted: 0},
+                data: {deleted: 1}
+            })
+
+            for (const groupByAPI of groupsByAPI.data.groups) {
+                if (groupByAPI.type !== 'generic') {
+                    continue;
+                }
+                const where = {
+                    mailGroupId: String(groupByAPI.id),
+                }
+                const groupsByMailGroupId = await prisma.mailGroup.findMany({where});
+                if (groupsByMailGroupId.length > 0) {
+                    logger.info('update');
+                    const groupByDB = groupsByMailGroupId[groupsByMailGroupId.length - 1] as any
+                    const data = {
+                        mailGroupId: String(groupByAPI.id),
+                        name: groupByAPI.name,
+                        description: groupByAPI.description,
+                        label: groupByAPI.label,
+                        deleted: 0,
+                    }
+
+                    console.log(data);
+                    const updatedMailGroup = await prisma.mailGroup.update({
+                        where: {id: groupByDB.id},
+                        data,
+                    })
+
+                    const memberMails = groupByAPI.members.filter((member: any) => member.type === 'user');
+                    const mailIds = memberMails.map((mail: any) => mail.id);
+
+                    await prisma.mailMailGroup.deleteMany({
+                        where: {
+                            mailGroupId: updatedMailGroup.id,
+                        }
+                    })
+                    for (const mailId of mailIds) {
+                        const where = {
+                            mailId: String(mailId),
+                        }
+                        const mails = await prisma.mail.findMany({where});
+
+                        if (mails.length > 0) {
+                            const mail = mails[mails.length - 1];
+                            logger.info(`added member ${mail.email} into group ${updatedMailGroup.name}`);
+
+                            const data = {
+                                mailGroupId: updatedMailGroup.id,
+                                mailId: mail.id,
+                            }
+                            await prisma.mailMailGroup.create({data})
+                        }
+                    }
+                } else {
+                    logger.info('create');
+                    const data = {
+                        mailGroupId: String(groupByAPI.id),
+                        name: groupByAPI.name,
+                        description: groupByAPI.description,
+                        label: groupByAPI.label,
+                    }
+                    const createdMailGroup = await prisma.mailGroup.create({data})
+                    logger.info(`created new group by sync: ${data.name}`);
+
+                    const memberMails = groupByAPI.members.filter((member: any) => member.type === 'user');
+                    const mailIds = memberMails.map((mail: any) => mail.id);
+
+                    for (const mailId of mailIds) {
+                        const where = {
+                            mailId: String(mailId),
+                        }
+                        const mails = await prisma.mail.findMany({where});
+
+                        if (mails.length > 0) {
+                            const mail = mails[mails.length - 1];
+                            logger.info(`added member ${mail.email} into group ${createdMailGroup.name}`);
+
+                            const data = {
+                                mailGroupId: createdMailGroup.id,
+                                mailId: mail.id,
+                            }
+                            await prisma.mailMailGroup.create({data})
+                        }
+                    }
+                }
+            }
+
+            return res.status(200).json({info: 'Success'});
+        } catch (error: unknown) {
+            return errorHandler(error, res);
+        }
+    }
 }
