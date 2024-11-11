@@ -39,7 +39,7 @@ export class DbMailService extends Crud {
                 return res.status(403).send('ID is undefined');
             }
             const where = {id};
-            const include = {user: true}
+            const include = {user: true, groups: {include: {mailGroup: true}}};
             const data = await prisma.mail.findUnique({where, include});
             if (!data) {
                 logger.error(`Entity with ID ${id} not found`);

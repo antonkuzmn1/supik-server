@@ -112,6 +112,7 @@ export class DbMailMailGroupService {
 
                     const include = {
                         mail: true,
+                        mailGroup: true,
                     }
 
                     try {
