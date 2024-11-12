@@ -29,8 +29,8 @@ import path from 'path';
 import * as dns from 'node:dns';
 import fs from 'fs';
 
-const robotoNormalFontPath = path.join(__dirname, '../../fonts/Roboto/Roboto-Regular.ttf');
-const robotoBoldFontPath = path.join(__dirname, '../../fonts/Roboto/Roboto-Bold.ttf');
+const robotoNormalFontPath = path.join(__dirname, '../../assets/Roboto/Roboto-Regular.ttf');
+const robotoBoldFontPath = path.join(__dirname, '../../assets/Roboto/Roboto-Bold.ttf');
 
 const className = 'DbVpnService';
 
@@ -863,7 +863,7 @@ username:s:${rdpUsername}`;
         return new Promise((resolve, reject) => {
             dns.resolve(hostname, (err, addresses) => {
                 if (err) {
-                    reject(null);
+                    resolve(null);
                 } else {
                     resolve(addresses[0]);
                 }
