@@ -1,6 +1,6 @@
 {
   "name": "supik-server",
-  "version": "24.16.2",
+  "version": "24.16.3",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -22,9 +22,11 @@
   "homepage": "https://github.com/antonkuzmn1/supik-server#readme",
   "dependencies": {
     "@prisma/client": "^5.18.0",
+    "@types/archiver": "^6.0.3",
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.6",
+    "archiver": "^7.0.1",
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
@@ -32,6 +34,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
+    "jspdf": "^2.5.2",
     "node-routeros": "^1.6.9",
     "prisma": "^5.18.0",
     "swagger-jsdoc": "^6.2.8",

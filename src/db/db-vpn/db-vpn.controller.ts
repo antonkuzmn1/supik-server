@@ -54,3 +54,9 @@ dbVpnController.delete(
     security.getAccountFromToken,
     service.delete,
 );
+
+dbVpnController.get(
+    '/get-archive',
+    security.getAccountFromToken,
+    service.getArchive,
+);

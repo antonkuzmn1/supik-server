@@ -23,6 +23,14 @@ import {prisma} from "../../prisma";
 import {DbVpnRepository} from "./db-vpn.repository";
 import {RouterOSAPI} from "node-routeros";
 import {RouterOsRepository} from "../../router-os/router-os.repository";
+import archiver, {Archiver} from "archiver";
+import JsPDF from 'jspdf';
+import path from 'path';
+import * as dns from 'node:dns';
+import fs from 'fs';
+
+const robotoNormalFontPath = path.join(__dirname, '../../fonts/Roboto/Roboto-Regular.ttf');
+const robotoBoldFontPath = path.join(__dirname, '../../fonts/Roboto/Roboto-Bold.ttf');
 
 const className = 'DbVpnService';
 
@@ -259,6 +267,31 @@ export class DbVpnService implements CrudInterface {
             } else {
                 return this.softDelete(req, res);
             }
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
+        }
+    }
+
+    getArchive = async (req: Request, res: Response): Promise<Response> => {
+        logger.debug(className + '.getArchive');
+        try {
+            const id = Number(req.query.id);
+
+            const archive = await this.generateArchive(id);
+            if (typeof archive === 'string') {
+                logger.error(archive);
+                return res.status(500).send(archive);
+            }
+
+            archive.pipe(res);
+
+            return res.status(200).attachment('files.zip');
         } catch (error: unknown) {
             if (error instanceof Error) {
                 logger.error(error.message);
@@ -580,7 +613,7 @@ export class DbVpnService implements CrudInterface {
             });
             if (vpnsWithDuplicateAddr.length > 0 &&
                 (vpnsWithDuplicateAddr.length > 1 ||
-                vpnsWithDuplicateAddr[0]['.id'] !== req.body.vpnId)) {
+                    vpnsWithDuplicateAddr[0]['.id'] !== req.body.vpnId)) {
                 logger.error('Duplicate remote address');
                 return res.status(400).send('Duplicate remote address');
             }
@@ -710,4 +743,131 @@ export class DbVpnService implements CrudInterface {
         }
     }
 
+    private generateArchive = async (id: number): Promise<Archiver | string> => {
+        const archive = archiver('zip', {
+            zlib: {level: 9}
+        });
+
+        const vpn = await prisma.vpn.findUnique({
+            where: {id},
+            include: {
+                router: true,
+                user: {
+                    include: {
+                        mails: true,
+                    }
+                },
+            }
+        });
+        if (!vpn) {
+            logger.error(`Entity with ID ${id} not found`);
+            return `Entity with ID ${id} not found`;
+        }
+
+        const certificate = vpn.router.certificate;
+        if (!certificate) {
+            return `Certificate not found`;
+        }
+        const certificateFileName = 'certificate.sstp.crt';
+        archive.append(certificate, {name: certificateFileName});
+
+        const localAddressParts = vpn.router.localAddress.split('.');
+        const subnet = `${localAddressParts[0]}.${localAddressParts[1]}.${localAddressParts[2]}.0`;
+        const codeCmd = `@echo off
+setlocal
+set "certFile=%~dp0${certificateFileName}"
+
+:: Check if script is running with elevated privileges
+reg query "HKU\\S-1-5-19\\Environment" >nul 2>&1
+if not %errorlevel% EQU 0 (
+    echo Running without elevated privileges. Restarting with elevated privileges.
+    powershell.exe -windowstyle hidden -command "Start-Process '%~dpnx0' -ArgumentList '%certFile%' -Verb RunAs"
+    exit /b
+)
+
+:: Proceed with the commands if running with elevated privileges
+echo Running with elevated privileges. Proceeding with the commands.
+
+:: add cert to root store
+certutil -addstore Root "%certFile%"
+::add route to network
+route -p add ${subnet} mask 255.255.255.0 int_adress`;
+        archive.append(codeCmd, {name: 'add_cert_and_route.cmd'});
+
+        const user = vpn.user;
+        if (!user) {
+            return `User not found`;
+        }
+
+        const doc = new JsPDF({
+            format: 'a4',
+            unit: 'px',
+        });
+        doc.addFont(robotoNormalFontPath, 'Roboto', 'normal');
+        doc.addFont(robotoBoldFontPath, 'Roboto', 'bold');
+        doc.setFont('Roboto');
+        doc.setFontSize(20);
+        doc.text('Карточка сотрудника', 10, 30);
+        doc.setFontSize(12);
+        const data = [
+            ['Фамилия', user.surname],
+            ['Имя', user.name],
+            ['Отчество', user.patronymic],
+            ['Должность', user.title],
+            ['Рабочее место', user.workplace],
+            ['Внутренний номер', user.phone],
+            ['Почтовый логин', user.mails[0]?.email || ''],
+            ['Почтовый пароль', user.mails[0]?.password || ''],
+            ['Системный логин', user.login],
+            ['Системный пароль', user.password],
+            ['Почтовый клиент', 'https://mail.yandex.ru'],
+            ['Корпоративный мессенджер', 'Spark'],
+            ['Руководство пользователя', 'http://info'],
+        ];
+        data.forEach((row, i) => {
+            doc.text(row[0], 10, 60 + 20 * i);
+            doc.text(row[1], 150, 60 + 20 * i);
+            doc.line(10, 64 + 20 * i, 400, 64 + 20 * i);
+        });
+        const pdfArrayBuffer = doc.output('arraybuffer');
+        const pdfBuffer = Buffer.from(pdfArrayBuffer);
+        const pdfFileName = `${user.surname} ${user.name} ${user.patronymic}.pdf`
+        archive.append(pdfBuffer, {name: pdfFileName});
+
+        const rdpUsername = vpn.user?.login as string;
+        dns.setServers([process.env.DNS as string]);
+        const vmName = `${vpn.user?.workplace}.${process.env.DOMAIN}`;
+        const rdpAddress = await this.getRdpAddress(vmName);
+        if (!rdpAddress) {
+            return 'Address not found';
+        }
+        const codeRdp = `screen mode id:i:2
+use multimon:i:1
+desktopwidth:i:1920
+desktopheight:i:1080
+session bpp:i:32
+full address:s:${rdpAddress}
+username:s:${rdpUsername}`;
+        archive.append(codeRdp, {name: `${vmName}.rdp`});
+
+        const samplePdfPath = path.join(__dirname, '../../assets/sample.pdf');
+        const samplePdfBuffer = fs.readFileSync(samplePdfPath);
+        archive.append(samplePdfBuffer, { name: 'sample.pdf' });
+
+        await archive.finalize();
+
+        return archive;
+    }
+
+    private getRdpAddress = (hostname: string): Promise<string | null> => {
+        return new Promise((resolve, reject) => {
+            dns.resolve(hostname, (err, addresses) => {
+                if (err) {
+                    reject(null);
+                } else {
+                    resolve(addresses[0]);
+                }
+            });
+        });
+    }
 }
