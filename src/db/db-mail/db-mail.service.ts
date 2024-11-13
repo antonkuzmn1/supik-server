@@ -165,6 +165,16 @@ export class DbMailService extends Crud {
                 }
             }
 
+            const description = req.query.description;
+            if (description) {
+                where = {
+                    ...where,
+                    description: {
+                        contains: description,
+                    },
+                }
+            }
+
             const userId = req.query.userId as string
             if (userId) {
                 where = {
@@ -195,6 +205,7 @@ export class DbMailService extends Crud {
             const nameMiddle = req.body.data.nameMiddle;
             const position = req.body.data.position;
             const isAdmin = req.body.data.isAdmin;
+            const description = req.body.data.description;
             const userId = req.body.data.userId;
 
             const mailYandexToken = process.env.MAIL_YANDEX_TOKEN;
@@ -234,6 +245,7 @@ export class DbMailService extends Crud {
                     nameMiddle: createdAccountByAPI.data.name.middle,
                     position: createdAccountByAPI.data.position,
                     isAdmin: createdAccountByAPI.data.isAdmin ? 1 : 0,
+                    description: description,
                     userId: userId ? userId : null,
                 }
                 console.log('data for prisma', data);
@@ -277,6 +289,7 @@ export class DbMailService extends Crud {
             const position = req.body.data.position;
             const isAdmin = req.body.data.isAdmin;
             const isEnabled = req.body.data.isEnabled;
+            const description = req.body.data.description;
             const userId = req.body.data.userId;
 
             const mailYandexToken = process.env.MAIL_YANDEX_TOKEN;
@@ -327,13 +340,18 @@ export class DbMailService extends Crud {
                     position: updatedAccountByAPI.data.position,
                     isEnabled: updatedAccountByAPI.data.isEnabled ? 1 : 0,
                     isAdmin: updatedAccountByAPI.data.isAdmin ? 1 : 0,
+                    description: description,
                     userId: userId ? userId : null,
                 }
                 const data = password.length > 0 ? {...dataWithoutPassword, password} : dataWithoutPassword;
                 console.log(data);
 
+                const include = {
+                    user: true,
+                }
+
                 try {
-                    const newValue = await prisma.mail.update({where, data});
+                    const newValue = await prisma.mail.update({where, data, include});
 
                     await prisma.log.create({
                         data: {
