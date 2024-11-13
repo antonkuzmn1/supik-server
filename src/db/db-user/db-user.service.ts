@@ -351,11 +351,13 @@ export class DbUserService implements CrudInterface {
             const duplicateLogins = await prisma.user.findMany({
                 where: {
                     id: {
-                        not: dataToCreate.id
+                        not: dataToCreate.id,
                     },
-                    login: dataToCreate.login
+                    login: dataToCreate.login,
+                    deleted: 0,
                 }
             });
+            console.log(duplicateLogins);
             if (duplicateLogins.length > 0) {
                 return res.status(400).send('Login already exists');
             }
