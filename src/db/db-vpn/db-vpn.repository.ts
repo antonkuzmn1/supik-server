@@ -34,7 +34,15 @@ export class DbVpnRepository {
             },
             include: {
                 router: true,
-                user: true,
+                user: {
+                    include: {
+                        mails: {
+                            where: {
+                                deleted: 0,
+                            },
+                        },
+                    },
+                },
             },
         });
     }

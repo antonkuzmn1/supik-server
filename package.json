@@ -1,6 +1,6 @@
 {
   "name": "supik-server",
-  "version": "24.16.4",
+  "version": "24.17.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -36,6 +36,7 @@
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^2.5.2",
     "node-routeros": "^1.6.9",
+    "nodemailer": "^6.9.16",
     "prisma": "^5.18.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
@@ -47,6 +48,7 @@
     "@types/cors": "^2.8.17",
     "@types/jest": "^29.5.12",
     "@types/node": "^22.1.0",
+    "@types/nodemailer": "^6.4.16",
     "@types/supertest": "^6.0.2",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.6",

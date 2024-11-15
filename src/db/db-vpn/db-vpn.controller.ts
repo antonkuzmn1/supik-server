@@ -60,3 +60,9 @@ dbVpnController.get(
     security.getAccountFromToken,
     service.getArchive,
 );
+
+dbVpnController.post(
+    '/send-mail',
+    security.getAccountFromToken,
+    service.sendMail,
+);

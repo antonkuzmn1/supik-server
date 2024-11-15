@@ -52,6 +52,7 @@ export class DbUserRepository {
             include: {
                 vpns: true,
                 department: true,
+                mails: true,
             },
         });
     }

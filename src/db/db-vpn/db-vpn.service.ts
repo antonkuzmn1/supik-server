@@ -28,6 +28,7 @@ import JsPDF from 'jspdf';
 import path from 'path';
 import * as dns from 'node:dns';
 import fs from 'fs';
+import nodemailer, {Transporter} from "nodemailer";
 
 const robotoNormalFontPath = path.join(__dirname, '../../assets/Roboto/Roboto-Regular.ttf');
 const robotoBoldFontPath = path.join(__dirname, '../../assets/Roboto/Roboto-Bold.ttf');
@@ -283,7 +284,7 @@ export class DbVpnService implements CrudInterface {
         try {
             const id = Number(req.query.id);
 
-            const archive = await this.generateArchive(id);
+            const archive: Archiver | string = await this.generateArchive(id);
             if (typeof archive === 'string') {
                 logger.error(archive);
                 return res.status(500).send(archive);
@@ -292,6 +293,111 @@ export class DbVpnService implements CrudInterface {
             archive.pipe(res);
 
             return res.status(200).attachment('files.zip');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
+        }
+    }
+
+    sendMail = async (req: Request, res: Response): Promise<Response> => {
+        logger.debug(className + '.sendMail');
+        try {
+            const host = process.env.MAIL_YANDEX_TRANSPORTER_HOST;
+            if (!host) {
+                return res.status(500).send('param MAIL_YANDEX_TRANSPORTER_HOST undefined');
+            }
+
+            const port = Number(process.env.MAIL_YANDEX_TRANSPORTER_PORT);
+            if (!port) {
+                return res.status(500).send('param MAIL_YANDEX_TRANSPORTER_HOST undefined');
+            }
+            if (isNaN(Number(port))) {
+                return res.status(500).send('param MAIL_YANDEX_TRANSPORTER_PORT is not a number');
+            }
+
+            const secure = Boolean(process.env.MAIL_YANDEX_TRANSPORTER_SECURE);
+
+            const user = process.env.MAIL_YANDEX_TRANSPORTER_AUTH_USER;
+            if (!user) {
+                return res.status(500).send('param MAIL_YANDEX_TRANSPORTER_AUTH_USER undefined');
+            }
+
+            const pass = process.env.MAIL_YANDEX_TRANSPORTER_AUTH_PASS;
+            if (!pass) {
+                return res.status(500).send('param MAIL_YANDEX_TRANSPORTER_AUTH_PASS undefined');
+            }
+
+            const targetMail = req.body.targetMail;
+            if (!targetMail) {
+                return res.status(400).send('Target mail required');
+            }
+
+            if (typeof targetMail !== 'string') {
+                return res.status(400).send('Target mail should be a string');
+            }
+
+            const id = Number(req.body.id);
+            if (!id) {
+                return res.status(400).send('ID required');
+            }
+            if (isNaN(id)) {
+                return res.status(500).send('ID is not a number');
+            }
+
+            const transporter: Transporter = nodemailer.createTransport({
+                host,
+                port,
+                secure,
+                auth: {
+                    user,
+                    pass
+                }
+            });
+
+            const archive: Archiver | string = await this.generateArchive(id);
+            if (typeof archive === 'string') {
+                logger.error(archive);
+                return res.status(500).send(archive);
+            }
+            const tempFilePath = path.join(__dirname, `archive.zip`);
+            const output = fs.createWriteStream(tempFilePath);
+            archive.pipe(output);
+            await new Promise((resolve, reject) => {
+                output.on('finish', resolve);
+                output.on('error', reject);
+            });
+
+            const mailOptions = {
+                from: user,
+                to: targetMail,
+                subject: 'Корпоративный VPN',
+                text: 'В архиве набор для подключения VPN',
+                attachments: [
+                    {
+                        filename: 'archive.zip',
+                        path: tempFilePath,
+                    },
+                ],
+            };
+
+            try {
+                console.log('mailOptions:', mailOptions);
+                await transporter.sendMail(mailOptions);
+                return res.status(200).send('Success');
+            } catch (error) {
+                if (error instanceof Error) {
+                    logger.error(error.message);
+                    return res.status(500).send(error.message);
+                } else {
+                    logger.error('Unexpected error');
+                    return res.status(500).send('Unexpected error');
+                }
+            }
         } catch (error: unknown) {
             if (error instanceof Error) {
                 logger.error(error.message);
@@ -852,7 +958,7 @@ username:s:${rdpUsername}`;
 
         const samplePdfPath = path.join(__dirname, '../../assets/sample.pdf');
         const samplePdfBuffer = fs.readFileSync(samplePdfPath);
-        archive.append(samplePdfBuffer, { name: 'sample.pdf' });
+        archive.append(samplePdfBuffer, {name: 'sample.pdf'});
 
         await archive.finalize();
 
