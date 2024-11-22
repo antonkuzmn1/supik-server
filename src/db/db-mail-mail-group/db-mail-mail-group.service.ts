@@ -86,8 +86,8 @@ export class DbMailMailGroupService {
             }
             const mailId = mailEntity.mailId
 
-            const mailYandexToken = process.env.MAIL_YANDEX_TOKEN;
-            const mailYandexOrgId = process.env.MAIL_YANDEX_ORG_ID;
+            const mailYandexToken = (await prisma.settings.findUnique({where: {key: 'mailYandexToken'}}))?.value;
+            const mailYandexOrgId = (await prisma.settings.findUnique({where: {key: 'mailYandexOrgId'}}))?.value;
 
             try {
                 const responseByYandexAPI = await axios.post(
@@ -162,8 +162,8 @@ export class DbMailMailGroupService {
             }
             const mailId = mailEntity.mailId
 
-            const mailYandexToken = process.env.MAIL_YANDEX_TOKEN;
-            const mailYandexOrgId = process.env.MAIL_YANDEX_ORG_ID;
+            const mailYandexToken = (await prisma.settings.findUnique({where: {key: 'mailYandexToken'}}))?.value;
+            const mailYandexOrgId = (await prisma.settings.findUnique({where: {key: 'mailYandexOrgId'}}))?.value;
 
             console.log(mailGroupId);
             console.log(mailId);

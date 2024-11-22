@@ -154,8 +154,8 @@ export class DbMailGroupService extends Crud {
             const description = req.body.data.description;
             const label = req.body.data.label;
 
-            const mailYandexToken = process.env.MAIL_YANDEX_TOKEN;
-            const mailYandexOrgId = process.env.MAIL_YANDEX_ORG_ID;
+            const mailYandexToken = (await prisma.settings.findUnique({where: {key: 'mailYandexToken'}}))?.value;
+            const mailYandexOrgId = (await prisma.settings.findUnique({where: {key: 'mailYandexOrgId'}}))?.value;
 
             console.log('req.body.data:', req.body.data);
 
@@ -217,8 +217,8 @@ export class DbMailGroupService extends Crud {
             const description = req.body.data.description;
             const label = req.body.data.label;
 
-            const mailYandexToken = process.env.MAIL_YANDEX_TOKEN;
-            const mailYandexOrgId = process.env.MAIL_YANDEX_ORG_ID;
+            const mailYandexToken = (await prisma.settings.findUnique({where: {key: 'mailYandexToken'}}))?.value;
+            const mailYandexOrgId = (await prisma.settings.findUnique({where: {key: 'mailYandexOrgId'}}))?.value;
 
             console.log(req.body.data);
 
@@ -288,8 +288,8 @@ export class DbMailGroupService extends Crud {
         const funcName = this.className + '.softDelete';
         logger.debug(funcName);
         try {
-            const mailYandexToken = process.env.MAIL_YANDEX_TOKEN;
-            const mailYandexOrgId = process.env.MAIL_YANDEX_ORG_ID;
+            const mailYandexToken = (await prisma.settings.findUnique({where: {key: 'mailYandexToken'}}))?.value;
+            const mailYandexOrgId = (await prisma.settings.findUnique({where: {key: 'mailYandexOrgId'}}))?.value;
 
             const id = req.body.id;
             const where = {id}
@@ -336,8 +336,8 @@ export class DbMailGroupService extends Crud {
         const funcName = this.className + '.syncAccounts';
         logger.debug(funcName);
         try {
-            const mailYandexToken = process.env.MAIL_YANDEX_TOKEN;
-            const mailYandexOrgId = process.env.MAIL_YANDEX_ORG_ID;
+            const mailYandexToken = (await prisma.settings.findUnique({where: {key: 'mailYandexToken'}}))?.value;
+            const mailYandexOrgId = (await prisma.settings.findUnique({where: {key: 'mailYandexOrgId'}}))?.value;
 
             const groupsByAPI = await axios.get(
                 `https://api360.yandex.net/directory/v1/org/${mailYandexOrgId}/groups?perPage=999999`,

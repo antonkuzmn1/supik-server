@@ -81,7 +81,13 @@ export class SecurityService {
                 return res.status(403).send('Passwords do not match');
             }
 
-            const token = jwt.sign({id: account.id}, JWT_SECRET, {expiresIn: process.env.TOKEN_LIFETIME});
+            const tokenLifetime = (await prisma.settings.findUnique({where: {key: 'tokenLifetime'}}))?.value;
+
+            const token = jwt.sign(
+                {id: account.id},
+                JWT_SECRET,
+                {expiresIn: tokenLifetime ? tokenLifetime : '12h'}
+            );
 
             return res.status(200).json({token: token, account: account});
 

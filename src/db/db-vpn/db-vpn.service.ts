@@ -307,27 +307,27 @@ export class DbVpnService implements CrudInterface {
     sendMail = async (req: Request, res: Response): Promise<Response> => {
         logger.debug(className + '.sendMail');
         try {
-            const host = process.env.MAIL_YANDEX_TRANSPORTER_HOST;
+            const host = (await prisma.settings.findUnique({where: {key: 'mailYandexTransporterHost'}}))?.value;
             if (!host) {
                 return res.status(500).send('param MAIL_YANDEX_TRANSPORTER_HOST undefined');
             }
 
-            const port = Number(process.env.MAIL_YANDEX_TRANSPORTER_PORT);
+            const port = Number((await prisma.settings.findUnique({where: {key: 'mailYandexTransporterPort'}}))?.value);
             if (!port) {
-                return res.status(500).send('param MAIL_YANDEX_TRANSPORTER_HOST undefined');
+                return res.status(500).send('param MAIL_YANDEX_TRANSPORTER_PORT undefined');
             }
             if (isNaN(Number(port))) {
                 return res.status(500).send('param MAIL_YANDEX_TRANSPORTER_PORT is not a number');
             }
 
-            const secure = Boolean(process.env.MAIL_YANDEX_TRANSPORTER_SECURE);
+            const secure = Boolean((await prisma.settings.findUnique({where: {key: 'mailYandexTransporterSecure'}}))?.value);
 
-            const user = process.env.MAIL_YANDEX_TRANSPORTER_AUTH_USER;
+            const user = (await prisma.settings.findUnique({where: {key: 'mailYandexTransporterAuthUser'}}))?.value;
             if (!user) {
                 return res.status(500).send('param MAIL_YANDEX_TRANSPORTER_AUTH_USER undefined');
             }
 
-            const pass = process.env.MAIL_YANDEX_TRANSPORTER_AUTH_PASS;
+            const pass = (await prisma.settings.findUnique({where: {key: 'mailYandexTransporterAuthPass'}}))?.value;
             if (!pass) {
                 return res.status(500).send('param MAIL_YANDEX_TRANSPORTER_AUTH_PASS undefined');
             }
@@ -941,8 +941,10 @@ route -p add ${subnet} mask 255.255.255.0 int_adress`;
         archive.append(pdfBuffer, {name: pdfFileName});
 
         const rdpUsername = vpn.user?.login as string;
-        dns.setServers([process.env.DNS as string]);
-        const vmName = `${vpn.user?.workplace}.${process.env.DOMAIN}`;
+        const dnsAddress = (await prisma.settings.findUnique({where: {key: 'dnsServerAddress'}}))?.value
+        dns.setServers([dnsAddress as string]);
+        const localDomain = (await prisma.settings.findUnique({where: {key: 'localDomain'}}))?.value
+        const vmName = `${vpn.user?.workplace}.${localDomain}`;
         const rdpAddress = await this.getRdpAddress(vmName);
         if (!rdpAddress) {
             return 'Address not found';

@@ -280,3 +280,8 @@ model Log {
   Mail       Mail?       @relation(fields: [mailId], references: [id])
   MailGroup  MailGroup?  @relation(fields: [mailGroupId], references: [id])
 }
+
+model Settings {
+  key   String @id
+  value String @default("") @db.VarChar(100)
+}

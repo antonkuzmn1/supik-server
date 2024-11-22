@@ -429,8 +429,8 @@ export class DbUserService implements CrudInterface {
                 }
                 for (const mail of response.mails) {
                     try {
-                        const mailYandexToken = process.env.MAIL_YANDEX_TOKEN;
-                        const mailYandexOrgId = process.env.MAIL_YANDEX_ORG_ID;
+                        const mailYandexToken = (await prisma.settings.findUnique({where: {key: 'mailYandexToken'}}))?.value;
+                        const mailYandexOrgId = (await prisma.settings.findUnique({where: {key: 'mailYandexOrgId'}}))?.value;
                         const mailId = mail.mailId;
                         logger.debug(`Before disable Mail for Yandex: ${mail.id}`);
                         await axios.patch(

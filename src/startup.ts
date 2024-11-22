@@ -19,8 +19,14 @@ limitations under the License.
 import {prisma} from "./prisma";
 import {logger} from "./logger";
 import bcrypt from "bcrypt";
+import {NextFunction} from "express";
 
 export const startup = async () => {
+    await createAccountIfNotExists();
+    await createSettingsIfNotExists();
+}
+
+const createAccountIfNotExists = async () => {
     const account = await prisma.account.findUnique({
         where: {
             id: 1,
@@ -40,4 +46,35 @@ export const startup = async () => {
         });
         logger.info('Root has been created');
     }
+}
+
+const settingsParams = [
+    'tokenLifetime',
+    'mailYandexToken',
+    'mailYandexOrgId',
+    'mailYandexDomain',
+    'mailYandexTransporterHost',
+    'mailYandexTransporterPort',
+    'mailYandexTransporterSecure',
+    'mailYandexTransporterAuthUser',
+    'mailYandexTransporterAuthPass',
+    'routerDefaultPort',
+    'routerDefaultTimeout',
+    'dnsServerAddress',
+    'localDomain',
+]
+
+const createSettingsIfNotExists = async () => {
+    return new Promise<void>(resolve => {
+        settingsParams.forEach(param => {
+            prisma.settings.findUnique({where: {key: param}}).then((setting) => {
+                if (!setting) {
+                    prisma.settings.create({data: {key: param}}).then((_result) => {
+                        logger.info(`Setting param ${param} has been created`);
+                        resolve();
+                    })
+                }
+            });
+        })
+    });
 }

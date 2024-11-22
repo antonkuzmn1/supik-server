@@ -22,6 +22,7 @@ import {dbController} from "./db/db.controller";
 import {routerOsController} from "./router-os/router-os.controller";
 import {logController} from "./log/log.controller";
 import * as dns from "node:dns";
+import {settingsController} from "./settings/settings.controller";
 
 // /api
 export const router = Router();
@@ -32,19 +33,4 @@ router.use('/security', securityController);
 router.use('/db', dbController);
 router.use('/router-os', routerOsController)
 router.use('/log', logController);
-
-router.get('/test', (req, res) => {
-    const {domain} = req.query;
-    if (typeof domain !== 'string') {
-        return res.send('Error');
-    }
-
-    // dns.setServers(['192.168.250.10']);
-    dns.lookup(domain, (err, address) => {
-        if (err) {
-            res.send(`Error: ${err.message}`);
-        } else {
-            res.send(`IP address for ${domain}: ${address}`);
-        }
-    });
-});
+router.use('/settings', settingsController);
