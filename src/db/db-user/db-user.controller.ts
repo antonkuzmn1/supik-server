@@ -56,3 +56,10 @@ dbUserController.delete(
     middleware.accountShouldBeEditor,
     service.delete,
 );
+
+dbUserController.post(
+    '/send-mail',
+    security.getAccountFromToken,
+    middleware.accountShouldBeEditor,
+    service.sendMail,
+);

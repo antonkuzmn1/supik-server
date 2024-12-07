@@ -23,6 +23,12 @@ import {DbUserRepository} from "./db-user.repository";
 import {prisma} from "../../prisma";
 import {RouterOSAPI} from "node-routeros";
 import axios, {AxiosError} from "axios";
+import nodemailer, {Transporter} from "nodemailer";
+import path from "path";
+import JsPDF from "jspdf";
+
+const robotoNormalFontPath = path.join(__dirname, '../../assets/Roboto/Roboto-Regular.ttf');
+const robotoBoldFontPath = path.join(__dirname, '../../assets/Roboto/Roboto-Bold.ttf');
 
 const className = 'DbUserService';
 
@@ -87,6 +93,109 @@ export class DbUserService implements CrudInterface {
         logger.debug(className + '.delete');
         try {
             return this.softDelete(req, res);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(error.message);
+                return res.status(500).send(error.message);
+            } else {
+                logger.error('Unexpected error');
+                return res.status(500).send('Unexpected error');
+            }
+        }
+    }
+
+    sendMail = async (req: Request, res: Response): Promise<Response> => {
+        logger.debug(className + '.sendMail');
+        try {
+            const host = (await prisma.settings.findUnique({where: {key: 'mailYandexTransporterHost'}}))?.value;
+            if (!host) {
+                return res.status(500).send('param MAIL_YANDEX_TRANSPORTER_HOST undefined');
+            }
+
+            const port = Number((await prisma.settings.findUnique({where: {key: 'mailYandexTransporterPort'}}))?.value);
+            if (!port) {
+                return res.status(500).send('param MAIL_YANDEX_TRANSPORTER_PORT undefined');
+            }
+            if (isNaN(Number(port))) {
+                return res.status(500).send('param MAIL_YANDEX_TRANSPORTER_PORT is not a number');
+            }
+
+            const secure = Boolean((await prisma.settings.findUnique({where: {key: 'mailYandexTransporterSecure'}}))?.value);
+
+            const user = (await prisma.settings.findUnique({where: {key: 'mailYandexTransporterAuthUser'}}))?.value;
+            if (!user) {
+                return res.status(500).send('param MAIL_YANDEX_TRANSPORTER_AUTH_USER undefined');
+            }
+
+            const pass = (await prisma.settings.findUnique({where: {key: 'mailYandexTransporterAuthPass'}}))?.value;
+            if (!pass) {
+                return res.status(500).send('param MAIL_YANDEX_TRANSPORTER_AUTH_PASS undefined');
+            }
+
+            const targetMail = req.body.targetMail;
+            if (!targetMail) {
+                return res.status(400).send('Target mail required');
+            }
+
+            if (typeof targetMail !== 'string') {
+                return res.status(400).send('Target mail should be a string');
+            }
+
+            const id = Number(req.body.id);
+            if (!id) {
+                return res.status(400).send('ID required');
+            }
+            if (isNaN(id)) {
+                return res.status(500).send('ID is not a number');
+            }
+
+            const userEntity = await prisma.user.findUnique({where: {id: id}});
+            if (!userEntity) {
+                return res.status(500).send('User does not exist');
+            }
+
+            const transporter: Transporter = nodemailer.createTransport({
+                host,
+                port,
+                secure,
+                auth: {
+                    user,
+                    pass
+                }
+            });
+
+            const pdfBuffer: Buffer | string = await this.generatePDF(id); // адаптируй код под отправку pdf файла
+            if (typeof pdfBuffer === 'string') {
+                logger.error(pdfBuffer);
+                return res.status(500).send(pdfBuffer);
+            }
+
+            const mailOptions = {
+                from: user,
+                to: targetMail,
+                subject: 'Карта сотрудника',
+                text: 'В приложении карта сотрудника в формате PDF',
+                attachments: [
+                    {
+                        filename: `${userEntity.surname} ${userEntity.name} ${userEntity.patronymic}.pdf`,
+                        content: pdfBuffer,
+                    },
+                ],
+            };
+
+            try {
+                console.log('mailOptions:', mailOptions);
+                await transporter.sendMail(mailOptions);
+                return res.status(200).send('Success');
+            } catch (error) {
+                if (error instanceof Error) {
+                    logger.error(error.message);
+                    return res.status(500).send(error.message);
+                } else {
+                    logger.error('Unexpected error');
+                    return res.status(500).send('Unexpected error');
+                }
+            }
         } catch (error: unknown) {
             if (error instanceof Error) {
                 logger.error(error.message);
@@ -515,5 +624,55 @@ export class DbUserService implements CrudInterface {
             }
         }
     }
+
+    private generatePDF = async (id: number): Promise<Buffer | string> => {
+        const user = await prisma.user.findUnique({
+            where: { id },
+            include: {
+                mails: true,
+            },
+        });
+        if (!user) {
+            return `User not found`;
+        }
+
+        const doc = new JsPDF({
+            format: 'a4',
+            unit: 'px',
+        });
+        doc.addFont(robotoNormalFontPath, 'Roboto', 'normal');
+        doc.addFont(robotoBoldFontPath, 'Roboto', 'bold');
+        doc.setFont('Roboto');
+        doc.setFontSize(20);
+        doc.text('Карточка сотрудника', 10, 30);
+        doc.setFontSize(12);
+
+        const data = [
+            ['Фамилия', user.surname],
+            ['Имя', user.name],
+            ['Отчество', user.patronymic],
+            ['Должность', user.title],
+            ['Рабочее место', user.workplace],
+            ['Внутренний номер', user.phone],
+            ['Почтовый логин', user.mails[0]?.email || ''],
+            ['Почтовый пароль', user.mails[0]?.password || ''],
+            ['Системный логин', user.login],
+            ['Системный пароль', user.password],
+            ['Почтовый клиент', 'https://mail.yandex.ru'],
+            ['Корпоративный мессенджер', 'Spark'],
+            ['Руководство пользователя', 'http://info'],
+        ];
+
+        data.forEach((row, i) => {
+            doc.text(row[0], 10, 60 + 20 * i);
+            doc.text(row[1], 150, 60 + 20 * i);
+            doc.line(10, 64 + 20 * i, 400, 64 + 20 * i);
+        });
+
+        const pdfArrayBuffer = doc.output('arraybuffer');
+        const pdfBuffer = Buffer.from(pdfArrayBuffer);
+
+        return pdfBuffer;
+    };
 
 }
