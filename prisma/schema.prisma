@@ -61,6 +61,7 @@ model Group {
   accessDepartments Int @default(0) @db.TinyInt()
   accessMails       Int @default(0) @db.TinyInt()
   accessMailGroups  Int @default(0) @db.TinyInt()
+  accessItems       Int @default(0) @db.TinyInt()
 
   accountGroups     AccountGroup[]
   routerGroupViewer RouterGroupViewer[]
@@ -173,6 +174,7 @@ model User {
   vpns              Vpn[]
   leaderDepartments Department[] @relation("leaderDepartment")
   mails             Mail[]
+  items             Item[]
 
   department Department? @relation("memberDepartment", fields: [departmentId], references: [id])
 
@@ -251,6 +253,53 @@ model MailMailGroup {
   @@id([mailId, mailGroupId])
 }
 
+model Item {
+  id      Int      @id @default(autoincrement())
+  created DateTime @default(now()) @db.Timestamp(0)
+  updated DateTime @updatedAt @db.Timestamp()
+  deleted Int      @default(0) @db.TinyInt()
+
+  type           String    @default("") @db.VarChar(50)
+  article        String    @db.VarChar(15)
+  vendor         String    @default("") @db.VarChar(50)
+  device         String    @default("") @db.VarChar(255)
+  serialNumber   String    @default("") @db.VarChar(100)
+  partNumber     String    @default("") @db.VarChar(100)
+  supplier       String    @default("") @db.VarChar(100)
+  deliveryDate   DateTime?
+  warrantyMonths Int       @default(0)
+  cost           Int       @default(0)
+  state          String    @default("") @db.VarChar(50)
+  specs          String    @default("") @db.VarChar(255)
+  note           String    @default("") @db.VarChar(255)
+
+  userId Int?
+
+  documents ItemDocument[]
+  logs      Log[]
+
+  user User? @relation(fields: [userId], references: [id])
+}
+
+model ItemDocument {
+  id      Int      @id @default(autoincrement())
+  created DateTime @default(now()) @db.Timestamp(0)
+  updated DateTime @updatedAt @db.Timestamp()
+  deleted Int      @default(0) @db.TinyInt()
+
+  blob Bytes     @db.LongBlob
+  name String    @db.VarChar(255)
+  type String    @default("") @db.VarChar(255)
+  note String    @default("") @db.VarChar(255)
+  date DateTime? @default(now())
+
+  itemId Int
+
+  logs Log[]
+
+  item Item @relation(fields: [itemId], references: [id])
+}
+
 model Log {
   id      Int      @id @default(autoincrement())
   created DateTime @default(now()) @db.Timestamp(0)
@@ -260,25 +309,29 @@ model Log {
 
   initiatorId Int
 
-  accountId    Int?
-  groupId      Int?
-  routerId     Int?
-  vpnId        Int?
-  userId       Int?
-  departmentId Int?
-  mailId       Int?
-  mailGroupId  Int?
+  accountId      Int?
+  groupId        Int?
+  routerId       Int?
+  vpnId          Int?
+  userId         Int?
+  departmentId   Int?
+  mailId         Int?
+  mailGroupId    Int?
+  itemId         Int?
+  itemDocumentId Int?
 
   initiator Account @relation("initiator", fields: [initiatorId], references: [id])
 
-  account    Account?    @relation("account", fields: [accountId], references: [id])
-  group      Group?      @relation(fields: [groupId], references: [id])
-  router     Router?     @relation(fields: [routerId], references: [id])
-  vpn        Vpn?        @relation(fields: [vpnId], references: [id])
-  user       User?       @relation(fields: [userId], references: [id])
-  department Department? @relation(fields: [departmentId], references: [id])
-  Mail       Mail?       @relation(fields: [mailId], references: [id])
-  MailGroup  MailGroup?  @relation(fields: [mailGroupId], references: [id])
+  account      Account?      @relation("account", fields: [accountId], references: [id])
+  group        Group?        @relation(fields: [groupId], references: [id])
+  router       Router?       @relation(fields: [routerId], references: [id])
+  vpn          Vpn?          @relation(fields: [vpnId], references: [id])
+  user         User?         @relation(fields: [userId], references: [id])
+  department   Department?   @relation(fields: [departmentId], references: [id])
+  Mail         Mail?         @relation(fields: [mailId], references: [id])
+  MailGroup    MailGroup?    @relation(fields: [mailGroupId], references: [id])
+  Item         Item?         @relation(fields: [itemId], references: [id])
+  ItemDocument ItemDocument? @relation(fields: [itemDocumentId], references: [id])
 }
 
 model Settings {

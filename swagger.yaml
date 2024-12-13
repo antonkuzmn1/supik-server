@@ -3,7 +3,7 @@ openapi: 3.0.0
 info:
   title: Supik Server
   description: Users and Computer management system
-  version: 24.19.0
+  version: 24.20.0
 
 paths:
   /:

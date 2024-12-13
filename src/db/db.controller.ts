@@ -26,6 +26,8 @@ import {dbDepartmentController} from "./db-department/db-department.controller";
 import {dbMailController} from "./db-mail/db-mail.controller";
 import {dbMailGroupController} from "./db-mail-group/db-mail-group.controller";
 import {dbMailMailGroupController} from "./db-mail-mail-group/db-mail-mail-group.controller";
+import {dbItemController} from "./db-item/db-item.controller";
+import {dbItemDocumentController} from "./db-item-document/db-item-document.controller";
 
 // /api/db
 export const dbController = Router()
@@ -39,3 +41,5 @@ dbController.use('/department', dbDepartmentController);
 dbController.use('/mail', dbMailController);
 dbController.use('/mail-group', dbMailGroupController);
 dbController.use('/mail-mail-group', dbMailMailGroupController);
+dbController.use('/item', dbItemController);
+dbController.use('/item-document', dbItemDocumentController);

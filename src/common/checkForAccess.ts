@@ -26,6 +26,7 @@ export type GroupAccess = 'accessRouters'
     | 'accessDepartments'
     | 'accessMails'
     | 'accessMailGroups'
+    | 'accessItems'
 
 export const checkForAccess = (
     req: Request,

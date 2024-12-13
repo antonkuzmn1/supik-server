@@ -28,11 +28,12 @@ import {startup} from "./startup";
 dotenv.config();
 
 const app: Express = express();
-app.use(express.json());
 app.use(cors());
+app.use(express.json({ limit: '10gb' }));
+app.use(express.urlencoded({ limit: '10gb', extended: true }));
 app.use('/api', router);
 
-const version = '24.19.0';
+const version = '24.20.0';
 
 const PORT: string | 3000 = process.env.PORT || 3000;
 
