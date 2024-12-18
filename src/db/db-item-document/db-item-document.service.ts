@@ -25,7 +25,6 @@ export class DbItemDocumentService extends Crud {
                 created: true,
                 updated: true,
                 deleted: true,
-                blob: false,
                 name: true,
                 type: true,
                 note: true,
@@ -33,7 +32,7 @@ export class DbItemDocumentService extends Crud {
                 itemId: true,
                 item: true,
             };
-            const data = await prisma.item.findUnique({where, select});
+            const data = await prisma.itemDocument.findUnique({where, select});
             if (!data) {
                 logger.error(`Entity with ID ${id} not found`);
                 return res.status(403).send(`Entity with ID ${id} not found`);
