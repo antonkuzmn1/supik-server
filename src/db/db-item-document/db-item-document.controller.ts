@@ -47,3 +47,10 @@ dbItemDocumentController.delete(
     (req, res, next) => checkForAccess(req, res, next, 'accessItems', 'editor'),
     service.delete,
 );
+
+dbItemDocumentController.get(
+    '/get-blob',
+    security.getAccountFromToken,
+    (req, res, next) => checkForAccess(req, res, next, 'accessItems', 'viewer'),
+    service.getBlob,
+);

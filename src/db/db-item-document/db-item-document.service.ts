@@ -10,6 +10,40 @@ export class DbItemDocumentService extends Crud {
         super();
     }
 
+    protected findUnique = async (req: Request, res: Response): Promise<Response> => {
+        const funcName = this.className + '.findUnique';
+        logger.debug(funcName);
+        try {
+            const id = Number(req.query.id);
+            if (!id) {
+                logger.error(`${funcName}: ID is undefined`);
+                return res.status(403).send('ID is undefined');
+            }
+            const where = {id};
+            const select = {
+                id: true,
+                created: true,
+                updated: true,
+                deleted: true,
+                blob: false,
+                name: true,
+                type: true,
+                note: true,
+                date: true,
+                itemId: true,
+                item: true,
+            };
+            const data = await prisma.item.findUnique({where, select});
+            if (!data) {
+                logger.error(`Entity with ID ${id} not found`);
+                return res.status(403).send(`Entity with ID ${id} not found`);
+            }
+            return res.status(200).json({itemDocument: data});
+        } catch (error: unknown) {
+            return errorHandler(error, res);
+        }
+    }
+
     protected findMany = async (req: Request, res: Response): Promise<Response> => {
         const funcName = this.className + '.findMany';
         logger.debug(funcName);
@@ -118,9 +152,20 @@ export class DbItemDocumentService extends Crud {
                 }
             }
 
-            const include = {
+            const select = {
+                id: true,
+                created: true,
+                updated: true,
+                deleted: true,
+                blob: false,
+                name: true,
+                type: true,
+                note: true,
+                date: true,
+                itemId: true,
+                item: true,
             };
-            const data = await prisma.itemDocument.findMany({where, include});
+            const data = await prisma.itemDocument.findMany({where, select});
 
             return res.status(200).json({itemDocuments: data});
         } catch (error: unknown) {
@@ -189,6 +234,32 @@ export class DbItemDocumentService extends Crud {
             });
 
             return res.status(200).json({itemDocument: response});
+        } catch (error: unknown) {
+            return errorHandler(error, res);
+        }
+    }
+
+    getBlob = async (req: Request, res: Response): Promise<Response> => {
+        const funcName = this.className + '.getBlob';
+        logger.debug(funcName);
+        try {
+            const id = Number(req.query.id);
+            if (!id) {
+                logger.error(`${funcName}: ID is undefined`);
+                return res.status(403).send('ID is undefined');
+            }
+            const where = {id};
+            const select = {
+                id: true,
+                blob: true,
+                name: true,
+            };
+            const data = await prisma.itemDocument.findUnique({where, select});
+            if (!data) {
+                logger.error(`Entity with ID ${id} not found`);
+                return res.status(403).send(`Entity with ID ${id} not found`);
+            }
+            return res.status(200).json({itemDocument: data});
         } catch (error: unknown) {
             return errorHandler(error, res);
         }
