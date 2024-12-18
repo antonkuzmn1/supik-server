@@ -302,6 +302,10 @@ export class DbItemService extends Crud {
             const note = req.body.data.note;
             const userId = req.body.data.userId;
 
+            if (!article || article?.length === 0) {
+                return res.status(400).send('Article cannot be empty');
+            }
+
             const duplicateArticle = await prisma.item.findMany({
                 where: {
                     article,
